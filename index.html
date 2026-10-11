@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="ControlCard">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="theme-color" content="#f59e0b">
-    <link rel="manifest" href="manifest.json?v=4.2">
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f59e0b' rx='20'/%3E%3Ctext x='50' y='65' font-size='45' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3ECC%3C/text%3E%3C/svg%3E">
     
     <title>ControlCardMult</title>
@@ -252,6 +252,7 @@
         </div>
         <label style="display:flex; align-items:center; gap:8px; margin:0 0 14px; font-size:0.8rem; color:var(--text-light); cursor:pointer;"><input type="checkbox" id="login-manter" checked style="width:18px; height:18px; accent-color: var(--primary);"> Manter conectado neste aparelho</label>
         <button class="btn btn-primary" onclick="tentarLogin()">ENTRAR</button>
+        <div style="text-align:center; margin-top:10px;"><a href="#" onclick="esqueciPin(); return false;" style="color:var(--text-light); font-size:0.78rem; text-decoration:underline;">Esqueci meu PIN</a></div>
         
         <div id="btn-importar-login" style="margin-top: 15px; text-align: center; border-top: 1px dashed var(--border); padding-top: 15px;">
             <p style="font-size: 0.75rem; color: var(--text-light); margin-bottom: 8px;">Primeiro acesso ou tem backup?</p>
@@ -466,7 +467,7 @@
         <div class="page-header">
             <div class="brand-line" style="margin-bottom: 0;">
                 <div class="brand-mark">CC</div>
-                <span class="brand-name">ControlCardMult <span class="v-badge">v4.2</span>
+                <span class="brand-name">ControlCardMult <span class="v-badge" id="v-badge"></span>
                     <span id="cloud-status-icon" class="material-icons-outlined cloud-status synced" onclick="sincronizarManual(false, true)">cloud_done</span>
                 </span>
             </div>
@@ -556,9 +557,18 @@
             <div class="section-label">👤 Meu perfil</div>
             <div class="card acc-card open">
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">person</span><span class="acc-title">Meu perfil e acesso</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
-<div class="acc-body"><p class="helper">Seus dados (pessoas, cartões e lançamentos) são só seus, separados dos de outros usuários.</p><button class="btn btn-danger" style="margin-bottom: 8px; font-size: 1rem; padding: 16px;" onclick="fazerLogout()"><span class="material-icons-outlined">power_settings_new</span> DESCONECTAR / SAIR DO PERFIL</button><button class="btn btn-outline" style="color:var(--success); border-color:var(--success);" onclick="baixarExcelUsuario()"><span class="material-icons-outlined">table_view</span> BAIXAR MEU EXCEL (CSV)</button></div>
+<div class="acc-body"><div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;"><span class="helper" style="margin:0;">Seus dados (pessoas, cartões e lançamentos) são só seus.</span><button class="btn-small" style="color:var(--text-light); white-space:nowrap; padding:5px 9px; font-size:0.72rem;" onclick="fazerLogout()"><span class="material-icons-outlined" style="font-size:0.95rem; vertical-align:middle;">logout</span> Desconectar</button></div><button class="btn btn-outline" style="color:var(--success); border-color:var(--success);" onclick="baixarExcelUsuario()"><span class="material-icons-outlined">table_view</span> BAIXAR MEU EXCEL (CSV)</button></div>
 </div>
-            <div class="card acc-card">
+<div class="card acc-card">
+<div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">password</span><span class="acc-title">Meu PIN e e-mail</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
+<div class="acc-body"><p class="helper">O e-mail serve para recuperar o PIN: se você esquecer, o novo PIN chega por e-mail.</p>
+                <div class="form-group"><label>PIN ATUAL</label><input type="password" id="pf-pin-atual" class="form-input" inputmode="numeric" maxlength="4" placeholder="4 dígitos"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;"><input type="password" id="pf-pin-novo" class="form-input" inputmode="numeric" maxlength="4" placeholder="NOVO PIN"><input type="password" id="pf-pin-conf" class="form-input" inputmode="numeric" maxlength="4" placeholder="REPITA"></div>
+                <button class="btn btn-primary" style="padding:10px;" onclick="trocarMeuPin()">TROCAR PIN</button>
+                <div class="form-group" style="margin-top:12px;"><label>E-MAIL PARA RECUPERAR O PIN</label><input type="email" id="pf-email" class="form-input" placeholder="voce@email.com" autocomplete="email"></div>
+                <button class="btn btn-outline" style="padding:10px;" onclick="salvarMeuEmail()">SALVAR E-MAIL</button></div>
+</div>
+                        <div class="card acc-card">
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">notifications</span><span class="acc-title">Avisos (push)</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
 <div class="acc-body"><label class="aj-linha"><span><strong>Ativar avisos</strong><br><span id="aj-permissao" style="font-size:0.7rem; color:var(--text-light);"></span></span><input type="checkbox" id="aj-ativo"></label>
                 <button class="btn btn-outline" style="margin:8px 0 4px; padding:8px;" onclick="pedirPermissaoAvisos()">PERMITIR NOTIFICAÇÕES DO CELULAR</button>
@@ -665,6 +675,20 @@
 <div class="acc-body"><p class="helper">A nuvem é única e fica com o administrador. Aqui você envia e baixa só a SUA aba, quando quiser.</p><button class="btn btn-primary" style="margin-bottom:8px; padding:10px;" onclick="sincronizarManual(true, true)">ENVIAR MINHA ABA PARA A NUVEM</button><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="sincronizarManual(false, true)">BAIXAR MINHA ABA DA NUVEM</button><hr style="border:1px solid var(--border); margin:10px 0;"><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="exportarBackup(false)"><span class="material-icons-outlined">download</span> Baixar Backup JSON (meus dados)</button><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="document.getElementById('import-file').click()"><span class="material-icons-outlined">file_upload</span> Importar backup ou planilha (.xlsx)</button><input type="file" id="import-file" accept=".json,.xlsx,.xls" onchange="importarBackup(event)" style="display:none;"></div>
 </div>
 
+            <div class="card acc-card">
+<div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">history</span><span class="acc-title">Versões dos dados (restaurar)</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
+<div class="acc-body"><p class="helper">O app guarda pontos de restauração dos SEUS dados: um por dia, um a cada hora de uso e um antes de importar, restaurar ou baixar da nuvem. Toque em RESTAURAR para voltar a um deles.</p>
+                <button class="btn btn-outline" style="padding:8px; margin-bottom:6px;" onclick="criarPontoManual()">CRIAR PONTO DE RESTAURAÇÃO AGORA</button>
+                <div id="lista-snapshots"></div></div>
+</div>
+            <div class="card acc-card">
+<div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">system_update</span><span class="acc-title">Versão do app</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
+<div class="acc-body"><p class="helper">O app confere sozinho se há versão nova e se atualiza em segundo plano, sem você precisar sair dele.</p>
+                <div class="aj-linha" style="cursor:default;"><span>Versão instalada</span><strong id="ver-instalada"></strong></div>
+                <div class="aj-linha" style="cursor:default;"><span>Última verificação</span><span id="ver-ultima">—</span></div>
+                <div id="ver-notas" class="helper" style="margin-top:6px;"></div>
+                <button class="btn btn-outline" style="padding:8px; margin-top:6px;" onclick="verificarAtualizacao(true)">VERIFICAR ATUALIZAÇÃO AGORA</button></div>
+</div>
             <!-- ADMINISTRAÇÃO: só o que mexe com os usuários do sistema -->
             <div id="admin-panel" style="display: none;">
                 <div class="section-label" style="color: var(--danger);">🔑 Administração</div>
@@ -685,7 +709,7 @@
 </div>
                 <div class="card acc-card" style="border-color: var(--danger);">
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">shield</span><span class="acc-title">Backup geral e reinício</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
-<div class="acc-body"><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="exportarBackupGeral()"><span class="material-icons-outlined">download</span> Baixar backup GERAL (todos os usuários)</button><button class="btn btn-danger" style="padding:10px;" onclick="adminZerarTudo()">ZERAR BASE COMPLETA</button></div>
+<div class="acc-body"><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="exportarBackupGeral()"><span class="material-icons-outlined">download</span> Baixar backup GERAL (todos os usuários)</button><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="document.getElementById('import-geral').click()"><span class="material-icons-outlined">upload_file</span> Restaurar backup GERAL (arquivo)</button><input type="file" id="import-geral" accept=".json" onchange="importarBackup(event)" style="display:none;"><button class="btn btn-danger" style="padding:10px;" onclick="adminZerarTudo()">ZERAR BASE COMPLETA</button></div>
 </div>
             </div>
         </div>
@@ -693,7 +717,7 @@
 </div>
 
 <script>
-    const APP_VERSION = '4.2';
+    const APP_VERSION = '4.3'; // única fonte da versão; mude também o version.json (veja o LEIA-ME)
     // URL ÚNICA da nuvem (Google Apps Script), do administrador: vale para todos os usuários e aparelhos.
     // Cole a URL entre as aspas e suba o index.html. (O administrador também pode testar pelo campo em Ajuste > Administração.)
     const URL_NUVEM_APP = '';
@@ -760,7 +784,11 @@
         }
         return { versao: 'v4', usuarios: [], dados: {} };
     }
-    let ROOT = carregarRoot();
+    // ===== Versão do formato dos dados: cada passo leva o banco de um formato para o seguinte =====
+    const SCHEMA_ATUAL = 1;
+    const MIGRACOES = { 0: root => { /* 4.0 a 4.2: ainda sem número de formato; nada a converter */ } };
+    function migrarSchema(root) { let v = parseInt(root.schema) || 0; while (v < SCHEMA_ATUAL) { if (MIGRACOES[v]) MIGRACOES[v](root); v++; } root.schema = SCHEMA_ATUAL; root.appVersao = APP_VERSION; return root; }
+    let ROOT = migrarSchema(carregarRoot());
     let db = vincularDataset(normalizarDataset(novoDataset())); // banco vazio até alguém entrar
     function gravarRoot() { localStorage.setItem(DB_NOME, JSON.stringify(ROOT)); }
     if (migrouParaV4) { try { gravarRoot(); } catch (e) {} }
@@ -786,6 +814,7 @@
         db = vincularDataset(normalizarDataset(ROOT.dados[user.id]));
         const n = sanearDataset(db);
         if (criado || n > 0) salvarDB();
+        snapshotDiario();
     }
     // Garante que tudo o que um lançamento cita (pessoa, cartão, categoria) exista nos cadastros, sem nomes repetidos nem ids duplicados
     function sanearDataset(ds) {
@@ -810,7 +839,7 @@
     let base64Desp = null; let base64Pag = null;
     
     function salvarDB() {
-        try { gravarRoot(); if (currentUser) localStorage.setItem(chavePendente(), '1'); return true; }
+        try { gravarRoot(); if (currentUser) localStorage.setItem(chavePendente(), '1'); snapshotPorTempo(); return true; }
         catch (e) { toast('⚠️ Memória do aparelho cheia! Baixe um backup e apague comprovantes antigos.', 'erro'); return false; }
     }
 
@@ -887,8 +916,9 @@
         }
 
         // Tenta achar o usuário digitado
-        let u = usersAtivos.find(x => x.nome === nome && x.pin === pin);
+        let u = usersAtivos.find(x => x.nome === nome && (x.pin === pin || (x.pinTemp && x.pinTemp === pin && Date.now() < (x.pinTempAte || 0))));
         if(u) {
+            if (u.pinTemp) { if (u.pin !== pin) u.pin = pin; delete u.pinTemp; delete u.pinTempAte; try { gravarRoot(); } catch (e) {} } // entrou com o PIN do e-mail: ele vira o PIN oficial
             executarLoginReal(u, manterConectado());
         } else {
             toast("Nome ou PIN incorretos!", "erro");
@@ -913,7 +943,7 @@
         carregarWebhook();
         montarFiltrosGlobais();
         carregarSelectsGerais();
-        mudarTela('dashboard', 'Visão Geral');
+        restaurarTelaDepoisDeAtualizar();
         sincronizarManual(false, false); 
         iniciarPushDiario();
         iniciarBloqueio(manter === undefined);
@@ -946,6 +976,7 @@
                 if (novo && novo.versao === 'v4' && novo.dados && !Array.isArray(novo.despesas)) { // backup geral (todos os usuários)
                     if (!semUsuarios && !(currentUser && currentUser.role === 'admin')) { e.target.value = ''; return toast('Só o administrador restaura o backup geral.', 'erro'); }
                     if (!confirm('Restaurar o backup GERAL? Isso SUBSTITUI os dados de TODOS os usuários deste aparelho.')) { e.target.value = ''; return; }
+                    if (currentUser) exportarBackupGeral(); // cópia de segurança do que existe agora
                     ROOT = { versao: 'v4', usuarios: Array.isArray(novo.usuarios) ? novo.usuarios : [], dados: {} };
                     Object.keys(novo.dados).forEach(k => { ROOT.dados[k] = normalizarDataset(novo.dados[k]); });
                 } else if (novo && Array.isArray(novo.despesas)) { // backup de um usuário (ou backup antigo)
@@ -953,7 +984,7 @@
                     const ds = normalizarDataset(novo);
                     if (currentUser) {
                         if (!confirm(`Substituir TODOS os seus dados atuais por este backup (${ds.despesas.length} despesas)?`)) { e.target.value = ''; return; }
-                        exportarBackup(true); trocarDataset(ds); sanearDataset(db);
+                        exportarBackup(true); criarSnapshot('Antes de restaurar backup'); trocarDataset(ds); sanearDataset(db);
                     } else if (ROOT.usuarios.length === 0 && usuariosBackup.length) { // tela de entrada: restaura o(s) usuário(s) do backup
                         ROOT.usuarios = usuariosBackup; const dono = usuariosBackup.find(u => u.role === 'admin') || usuariosBackup[0]; ROOT.dados[dono.id] = ds;
                     } else ROOT.dados.__novo = ds; // sem usuário no backup: o primeiro acesso criado recebe estes dados
@@ -969,7 +1000,7 @@
     // Pacote de UM usuário: mesmo formato do banco antigo (compatível com a nuvem e com backups anteriores)
     function pacoteDoUsuario(comPin) {
         const p = Object.assign({}, db); // cópia rasa; "usuarios" não é copiado (propriedade invisível)
-        p.usuarios = [{ id: currentUser.id, nome: currentUser.nome, role: currentUser.role, ativo: true }];
+        p.usuarios = [{ id: currentUser.id, nome: currentUser.nome, role: currentUser.role, ativo: true, email: currentUser.email || '' }];
         if (comPin) p.usuarios[0].pin = currentUser.pin;
         p.usuarioNome = currentUser.nome; p.versao = 'v4';
         return p;
@@ -1142,7 +1173,7 @@
             msg += `\n\nIsto SUBSTITUI despesas e pagamentos atuais (${db.despesas.length} e ${db.pagamentos.length}). Os logins são mantidos. Um backup JSON do estado atual será baixado antes. Continuar?`;
             if (!confirm(msg)) { limpar(); return; }
             if (db.despesas.length || db.pagamentos.length) exportarBackup(true);
-            trocarDataset(novo); sanearDataset(db); salvarDB(); limpar();
+            criarSnapshot('Antes de importar planilha'); trocarDataset(novo); sanearDataset(db); salvarDB(); limpar();
             toast('✅ Planilha migrada com sucesso!');
             setTimeout(() => window.location.reload(), 1500);
         }).catch(err => { limpar(); toast('Erro ao ler planilha: ' + err.message, 'erro'); });
@@ -1182,7 +1213,7 @@
                     if (pendente && !clickUsuario) { sincronizarManual(true, false); return; } // há alterações locais ainda não enviadas: envia em vez de sobrescrever
                     if (clickUsuario && pendente && !confirm('Você tem alterações neste aparelho que ainda não foram enviadas. Baixar da nuvem vai SUBSTITUIR essas alterações. Continuar?')) { icon.innerText = 'cloud_done'; icon.classList.add('synced'); return; }
                     if(nuvem.despesas.length > db.despesas.length || clickUsuario) {
-                        trocarDataset(nuvem); sanearDataset(db); try { gravarRoot(); } catch (e) {} localStorage.removeItem(chPend); carregarSelectsGerais();
+                        criarSnapshot('Antes de baixar da nuvem'); trocarDataset(nuvem); sanearDataset(db); try { gravarRoot(); } catch (e) {} localStorage.removeItem(chPend); carregarSelectsGerais();
                         atualizarTelaAtual();
                         if(clickUsuario) toast("Sua aba foi baixada da nuvem!");
                     }
@@ -1250,6 +1281,7 @@
     }
 
     function mudarTela(id, titulo) {
+        telaAtualId = id;
         document.querySelectorAll('.tela').forEach(t => t.style.display = 'none');
         document.getElementById('tela-' + id).style.display = 'block';
         document.getElementById('page-title').innerText = titulo;
@@ -1260,7 +1292,7 @@
         if(id === 'dashboard') atualizarSaldos();
         if(id === 'calendario') renderizarCalendario();
         if(id === 'extrato') renderizarExtrato();
-        if(id === 'config') { renderizarListaParcelamentos(); renderizarListaTransferencia(); carregarAjusteForm(); }
+        if(id === 'config') { renderizarListaParcelamentos(); renderizarListaTransferencia(); carregarAjusteForm(); carregarPerfilForm(); carregarSnapshotsLista(); atualizarCardVersao(); }
     }
 
     /* ================= CÁLCULOS E DASHBOARD ================= */
@@ -1618,7 +1650,7 @@
         document.getElementById('modal-overlay').classList.add('open'); document.getElementById('modal-lancamento').classList.add('open');
     }
     
-    function fecharModais() { document.getElementById('modal-overlay').classList.remove('open'); document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); fecharCalc(); }
+    function fecharModais() { document.getElementById('modal-overlay').classList.remove('open'); document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); fecharCalc(); if (recargaPendente) setTimeout(recarregarSuave, 300); }
     
     function trocarAbaModal(aba) { 
         document.getElementById('form-desp').style.display = aba === 'desp' ? 'block' : 'none';
@@ -2290,19 +2322,152 @@
     }
 
     function adminZerarTudo() {
-        if(prompt("Para apagar TUDO (incluindo usuários), digite:\n\nZERAR BASE COMPLETA") === "ZERAR BASE COMPLETA") {
+        if(prompt("Para apagar TUDO (incluindo usuários), digite:\n\nZERAR BASE COMPLETA") === "ZERAR BASE COMPLETA") { exportarBackupGeral(); // baixa uma cópia antes de apagar
             ROOT = { versao: 'v4', usuarios: [{ id: 'admin_master', nome: 'NETO', pin: '0000', role: 'admin', ativo: true }], dados: {} }; db = vincularDataset(normalizarDataset(novoDataset()));
             salvarDB(); alert("Resetado. Você será desconectado."); fazerLogout();
         }
     }
 
+    /* ================= MEU PIN, E-MAIL E "ESQUECI MEU PIN" ================= */
+    function mascararEmail(e) { const [a, d] = String(e).split('@'); return (a || '?').charAt(0) + '***@' + (d || ''); }
+    function carregarPerfilForm() { const el = document.getElementById('pf-email'); if (el && currentUser) el.value = currentUser.email || ''; }
+    function trocarMeuPin() {
+        const g = id => document.getElementById(id).value.trim(); const atual = g('pf-pin-atual'), novo = g('pf-pin-novo'), conf = g('pf-pin-conf');
+        if (atual !== String(currentUser.pin)) return toast('PIN atual incorreto.', 'erro');
+        if (!/^\d{4}$/.test(novo)) return toast('O novo PIN precisa ter 4 números.', 'erro');
+        if (novo !== conf) return toast('Os dois PINs novos não são iguais.', 'erro');
+        if (novo === atual) return toast('O novo PIN é igual ao atual.', 'erro');
+        currentUser.pin = novo; delete currentUser.pinTemp; delete currentUser.pinTempAte; salvarDB();
+        ['pf-pin-atual', 'pf-pin-novo', 'pf-pin-conf'].forEach(id => document.getElementById(id).value = ''); toast('✅ PIN trocado!');
+    }
+    function salvarMeuEmail() {
+        const e = document.getElementById('pf-email').value.trim().toLowerCase();
+        if (e && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) return toast('E-mail inválido.', 'erro');
+        if (e) currentUser.email = e; else delete currentUser.email;
+        salvarDB(); sincronizarManual(true);
+        toast(e ? (urlNuvem() ? 'E-mail salvo!' : 'E-mail salvo. A recuperação por e-mail precisa da nuvem configurada pelo administrador.') : 'E-mail removido.');
+    }
+    // O novo PIN é gerado aqui, enviado por e-mail pelo script do Google (só para o e-mail cadastrado) e vale por 1 hora
+    async function esqueciPin() {
+        const nome = document.getElementById('login-nome').value.trim().toUpperCase();
+        if (!nome) return toast('Digite o seu nome no campo acima e toque em "Esqueci meu PIN".', 'erro');
+        const u = ROOT.usuarios.find(x => x.nome === nome && x.ativo !== false);
+        if (!u) return toast('Usuário não encontrado neste aparelho.', 'erro');
+        const url = urlNuvem();
+        if (!u.email || !url) return alert('Não dá para recuperar por e-mail: ' + (!u.email ? 'este usuário não tem e-mail cadastrado' : 'a nuvem do app não está configurada') + '.\n\nPeça ao administrador para redefinir o seu PIN em Ajuste > Administração.');
+        if (!navigator.onLine) return toast('Sem internet.', 'erro');
+        if (!confirm('Enviar um NOVO PIN para o e-mail cadastrado (' + mascararEmail(u.email) + ')?')) return;
+        const novo = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+        u.pinTemp = novo; u.pinTempAte = Date.now() + 3600000; gravarRoot(); // vale já, mas só quem recebe o e-mail conhece
+        try {
+            const r = await fetch(url, { method: 'POST', body: JSON.stringify({ acao: 'recuperar_pin', usuario: u.nome, pin: novo }) }); const j = await r.json();
+            if (j && j.ok) alert('Pronto! Enviamos o novo PIN para ' + (j.email || mascararEmail(u.email)) + '. Ele vale por 1 hora; depois de entrar, troque-o em Ajuste > Meu PIN e e-mail.');
+            else { delete u.pinTemp; delete u.pinTempAte; gravarRoot(); toast('Não foi possível: ' + ((j && j.erro) || 'o e-mail não foi enviado') + '.', 'erro'); }
+        } catch (e) { toast('Não consegui confirmar o envio. Se o e-mail chegar, use o PIN dele.', 'erro'); }
+    }
+
+    /* ================= VERSÕES DOS DADOS (pontos de restauração) ================= */
+    const SNAP_MAX = 15;
+    function snapAbrir() {
+        return new Promise((ok, falha) => {
+            if (!window.indexedDB) return falha(new Error('sem IndexedDB'));
+            const r = indexedDB.open('controlcard_versoes', 1);
+            r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('dados', { keyPath: 'id', autoIncrement: true }); d.createObjectStore('meta', { keyPath: 'id' }).createIndex('user', 'userId'); };
+            r.onsuccess = () => ok(r.result); r.onerror = () => falha(r.error);
+        });
+    }
+    const snapReq = rq => new Promise((ok, falha) => { rq.onsuccess = () => ok(rq.result); rq.onerror = () => falha(rq.error); });
+    function fmtSnap(ts) { const d = new Date(ts); return `${pushPad(d.getDate())}/${pushPad(d.getMonth() + 1)} ${pushPad(d.getHours())}:${pushPad(d.getMinutes())}`; }
+    async function criarSnapshot(motivo) {
+        if (!currentUser) return false;
+        const uid = currentUser.id; const dados = JSON.stringify(db); // captura o estado AGORA, antes de qualquer troca
+        const meta = { userId: uid, ts: Date.now(), motivo, qtdDesp: db.despesas.length, qtdPag: db.pagamentos.length };
+        localStorage.setItem('cc_snap_ts_' + uid, String(meta.ts)); localStorage.setItem('cc_snap_sig_' + uid, String(dados.length)); // marca já, para dois gatilhos seguidos não criarem pontos repetidos
+        try {
+            const bd = await snapAbrir(); const tx = bd.transaction(['dados', 'meta'], 'readwrite');
+            const fim = new Promise((ok, falha) => { tx.oncomplete = ok; tx.onerror = () => falha(tx.error); tx.onabort = () => falha(tx.error); });
+            meta.id = await snapReq(tx.objectStore('dados').add({ dados })); tx.objectStore('meta').add(meta);
+            const ids = await snapReq(tx.objectStore('meta').index('user').getAllKeys(uid)); // da mais antiga para a mais nova
+            ids.slice(0, Math.max(0, ids.length - SNAP_MAX)).forEach(k => { tx.objectStore('dados').delete(k); tx.objectStore('meta').delete(k); });
+            await fim; bd.close();
+            localStorage.setItem('cc_snap_ts_' + uid, String(meta.ts)); localStorage.setItem('cc_snap_sig_' + uid, String(dados.length));
+            return true;
+        } catch (e) { return false; }
+    }
+    function snapshotDiario() { // 1 por dia, só se os dados mudaram desde o último ponto
+        if (!currentUser) return; const uid = currentUser.id, hoje = pushHoje(new Date());
+        if (localStorage.getItem('cc_snap_dia_' + uid) === hoje) return; localStorage.setItem('cc_snap_dia_' + uid, hoje);
+        if (localStorage.getItem('cc_snap_sig_' + uid) === String(JSON.stringify(db).length)) return; criarSnapshot('Diário');
+    }
+    function snapshotPorTempo() { // a cada 1 hora de uso com alterações
+        if (!currentUser) return; const ult = parseInt(localStorage.getItem('cc_snap_ts_' + currentUser.id)) || 0;
+        if (Date.now() - ult >= 3600000) criarSnapshot('Automático (1 h)');
+    }
+    async function listarSnapshots() { const bd = await snapAbrir(); const l = await snapReq(bd.transaction('meta').objectStore('meta').index('user').getAll(currentUser.id)); bd.close(); return l.sort((a, b) => b.ts - a.ts); }
+    async function carregarSnapshotsLista() {
+        const el = document.getElementById('lista-snapshots'); if (!el || !currentUser) return;
+        try {
+            const l = await listarSnapshots();
+            el.innerHTML = l.length ? l.map(s => `<div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:5px 0; border-bottom:1px solid var(--border);"><div><strong>${fmtSnap(s.ts)}</strong><div style="font-size:0.7rem; color:var(--text-light);">${escHtml(s.motivo)} • ${s.qtdDesp} despesas • ${s.qtdPag} recebimentos</div></div><button class="btn-small" style="color:var(--primary);" onclick="restaurarSnapshot(${s.id})">RESTAURAR</button></div>`).join('') : '<p class="helper">Ainda não há pontos de restauração.</p>';
+        } catch (e) { el.innerHTML = '<p class="helper">Este navegador não permite guardar versões dos dados.</p>'; }
+    }
+    async function criarPontoManual() { const ok = await criarSnapshot('Manual'); toast(ok ? 'Ponto de restauração criado!' : 'Não foi possível criar o ponto.', ok ? 'ok' : 'erro'); carregarSnapshotsLista(); }
+    async function restaurarSnapshot(id) {
+        try {
+            const bd = await snapAbrir(); const meta = await snapReq(bd.transaction('meta').objectStore('meta').get(id)); const reg = await snapReq(bd.transaction('dados').objectStore('dados').get(id)); bd.close();
+            if (!reg || !meta || meta.userId !== currentUser.id) return toast('Ponto de restauração não encontrado.', 'erro');
+            if (!confirm(`Voltar os seus dados para ${fmtSnap(meta.ts)} (${meta.qtdDesp} despesas, ${meta.qtdPag} recebimentos)?\n\nO estado atual será guardado antes como um novo ponto de restauração.`)) return;
+            await criarSnapshot('Antes de restaurar ponto');
+            trocarDataset(JSON.parse(reg.dados)); sanearDataset(db); salvarDB(); carregarSelectsGerais(); atualizarTelaAtual(); carregarSnapshotsLista(); sincronizarManual(true);
+            toast('✅ Dados restaurados para ' + fmtSnap(meta.ts));
+        } catch (e) { toast('Não foi possível restaurar.', 'erro'); }
+    }
+
+    /* ================= ATUALIZAÇÃO AUTOMÁTICA DO APP ================= */
+    let telaAtualId = 'dashboard', recargaPendente = false, ultimoInfoVersao = null, ultimaChecagemMs = 0;
+    const TITULOS_TELA = { dashboard: 'Visão Geral', calendario: 'Calendário', extrato: 'Extrato', config: 'Ajuste' };
+    function restaurarTelaDepoisDeAtualizar() {
+        let t = null; try { t = sessionStorage.getItem('cc_tela_retorno'); sessionStorage.removeItem('cc_tela_retorno'); } catch (e) {}
+        const id = TITULOS_TELA[t] ? t : 'dashboard'; mudarTela(id, TITULOS_TELA[id]);
+    }
+    function versaoMaior(a, b) { const x = String(a).split('.').map(n => parseInt(n) || 0), y = String(b).split('.').map(n => parseInt(n) || 0); for (let i = 0; i < Math.max(x.length, y.length); i++) { if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); } return false; }
+    function podeRecarregarAgora() { if (document.querySelector('.modal.open')) return false; const a = document.activeElement; return !(a && ['INPUT', 'TEXTAREA', 'SELECT'].includes(a.tagName)); }
+    // Recarrega com um esmaecer rápido, volta para a mesma tela e só faz isso quando não há nada sendo digitado
+    function recarregarSuave() {
+        recargaPendente = true; if (!podeRecarregarAgora()) return; recargaPendente = false;
+        try { sessionStorage.setItem('cc_tela_retorno', telaAtualId); } catch (e) {}
+        document.body.style.transition = 'opacity .25s'; document.body.style.opacity = '0';
+        setTimeout(() => location.reload(), 280);
+    }
+    async function verificarAtualizacao(manual) {
+        if (!navigator.onLine) { if (manual) toast('Sem internet.', 'erro'); return; }
+        try {
+            const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' }); const v = await r.json();
+            ultimaChecagemMs = Date.now(); localStorage.setItem('cc_ultima_verificacao', String(ultimaChecagemMs)); ultimoInfoVersao = v; atualizarCardVersao();
+            if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then(reg => reg && reg.update()).catch(() => {});
+            if (v && v.versao && versaoMaior(v.versao, APP_VERSION)) {
+                if (sessionStorage.getItem('cc_upd_tentou') === String(v.versao)) { if (manual) toast(`A versão ${v.versao} ainda não chegou a este endereço. Tente de novo em instantes.`, 'erro'); return; }
+                sessionStorage.setItem('cc_upd_tentou', String(v.versao)); recarregarSuave();
+            } else if (manual) toast('Você já está na versão mais recente (v' + APP_VERSION + ').');
+        } catch (e) { if (manual) toast('Não consegui verificar agora.', 'erro'); }
+    }
+    function atualizarCardVersao() {
+        const g = id => document.getElementById(id); if (!g('ver-instalada')) return;
+        g('ver-instalada').textContent = 'v' + APP_VERSION;
+        const ult = parseInt(localStorage.getItem('cc_ultima_verificacao')); g('ver-ultima').textContent = ult ? fmtSnap(ult) : '—';
+        const v = ultimoInfoVersao; g('ver-notas').innerHTML = v && Array.isArray(v.notas) && v.notas.length ? '<strong>Novidades da v' + escHtml(v.versao) + ':</strong><br>' + v.notas.map(n => '• ' + escHtml(n)).join('<br>') : '';
+    }
+    document.getElementById('v-badge').textContent = 'v' + APP_VERSION;
+    window.addEventListener('load', () => { setTimeout(() => verificarAtualizacao(), 2500); setInterval(() => { if (document.visibilityState === 'visible') verificarAtualizacao(); }, 600000); });
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState !== 'visible') return; if (recargaPendente) recarregarSuave(); else if (Date.now() - ultimaChecagemMs > 60000) verificarAtualizacao(); });
+
     /* ================= PWA: SERVICE WORKER ================= */
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             const tinhaControle = !!navigator.serviceWorker.controller;
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
+            navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).then(reg => reg.update()).catch(() => {});
             let recarregou = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinhaControle && !recarregou) { recarregou = true; toast('App atualizado! Recarregando...'); setTimeout(() => location.reload(), 800); } });
+            navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinhaControle && !recarregou) { recarregou = true; recarregarSuave(); } });
         });
     }
 </script>
