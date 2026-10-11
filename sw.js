@@ -1,7 +1,8 @@
 /* ControlCard — Service Worker
    Troque o número de VERSAO sempre que alterar ESTE arquivo (sw.js) ou os ícones.
-   O index.html se atualiza sozinho (rede primeiro); não precisa mexer na versão por causa dele. */
-const VERSAO = 'controlcard-v4.0';
+   O index.html e o version.json NÃO ficam presos no cache: sempre conferem a rede primeiro,
+   por isso a atualização do app chega sozinha (o próprio app avisa e recarrega). */
+const VERSAO = 'controlcard-v4.3';
 const CACHE_APP = VERSAO + '-app';
 const CACHE_EXT = VERSAO + '-ext';
 
@@ -26,6 +27,8 @@ self.addEventListener('activate', e => {
   );
 });
 
+self.addEventListener('message', e => { if (e.data === 'SKIP_WAITING') self.skipWaiting(); });
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -33,10 +36,15 @@ self.addEventListener('fetch', e => {
   if (SEM_CACHE.includes(url.hostname)) return;
 
   if (url.origin === self.location.origin) {
-    // Abrir o app: tenta a rede (pega versão nova); sem internet, abre a cópia guardada
+    // version.json: sempre da rede (é ele que avisa que há versão nova)
+    if (url.pathname.endsWith('/version.json')) {
+      e.respondWith(fetch(req.url, { cache: 'no-store' }).catch(() => new Response('{}', { headers: { 'Content-Type': 'application/json' } })));
+      return;
+    }
+    // Abrir o app: confere a rede (ignora o cache do navegador); sem internet, abre a cópia guardada
     if (req.mode === 'navigate') {
       e.respondWith(
-        fetch(req)
+        fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' })
           .then(r => { if (r.ok) { const cp = r.clone(); caches.open(CACHE_APP).then(c => c.put('./index.html', cp)); } return r; })
           .catch(() => caches.match('./index.html'))
       );
