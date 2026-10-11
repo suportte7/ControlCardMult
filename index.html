@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-title" content="ControlCard">
     <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="theme-color" content="#f59e0b">
-    <link rel="manifest" href="manifest.json?v=4.0">
+    <link rel="manifest" href="manifest.json?v=4.2">
     <link rel="icon" href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f59e0b' rx='20'/%3E%3Ctext x='50' y='65' font-size='45' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3ECC%3C/text%3E%3C/svg%3E">
     
     <title>ControlCardMult</title>
@@ -25,6 +25,21 @@
         [data-theme="dracula"] { --bg: #282a36; --surface: #44475a; --text: #f8f8f2; --text-light: #bd93f9; --primary: #50fa7b; --danger: #ff5555; --success: #50fa7b; --border: #6272a4; }
         [data-theme="ocean"] { --bg: #f0f8ff; --surface: #ffffff; --text: #0f172a; --text-light: #64748b; --primary: #0284c7; --danger: #ef4444; --success: #059669; --border: #cbd5e1; }
         [data-theme="midnight"] { --bg: #0f172a; --surface: #1e293b; --text: #f8fafc; --text-light: #94a3b8; --primary: #c084fc; --danger: #f43f5e; --success: #10b981; --border: #334155; }
+        /* + 11 temas escuros e claros */
+        [data-theme="ambar"] { --bg: #0f0f0f; --surface: #1a1a1a; --text: #e5e5e5; --text-light: #888888; --primary: #f59e0b; --danger: #ef4444; --success: #10b981; --border: #2a2a2a; }
+        [data-theme="floresta"] { --bg: #0c1a14; --surface: #14291f; --text: #ecfdf5; --text-light: #8fb5a0; --primary: #34d399; --danger: #fb7185; --success: #4ade80; --border: #1f3d2f; }
+        [data-theme="ameixa"] { --bg: #1c0f1a; --surface: #2b1727; --text: #fdf2f8; --text-light: #d8a7cf; --primary: #f472b6; --danger: #f87171; --success: #34d399; --border: #44243d; }
+        [data-theme="cobre"] { --bg: #1c1210; --surface: #2a1d19; --text: #fef3ec; --text-light: #c9a58f; --primary: #fb923c; --danger: #ef4444; --success: #22c55e; --border: #43302a; }
+        [data-theme="neon"] { --bg: #0a0a1a; --surface: #14143a; --text: #e0e7ff; --text-light: #8b8bd9; --primary: #22d3ee; --danger: #ff4d8d; --success: #4ade80; --border: #2a2a6a; }
+        [data-theme="lagoa"] { --bg: #06191d; --surface: #0d2a31; --text: #e6fbff; --text-light: #7fb7c2; --primary: #2dd4bf; --danger: #fb7185; --success: #4ade80; --border: #164650; }
+        [data-theme="menta"] { --bg: #f0fdf6; --surface: #ffffff; --text: #0f2a1d; --text-light: #5b7a6a; --primary: #059669; --danger: #dc2626; --success: #16a34a; --border: #c9e8d6; }
+        [data-theme="algodao"] { --bg: #fff1f5; --surface: #ffffff; --text: #3b0a1e; --text-light: #8a5a6e; --primary: #db2777; --danger: #dc2626; --success: #16a34a; --border: #f5cfdc; }
+        [data-theme="areia"] { --bg: #faf5eb; --surface: #fffdf8; --text: #2b2113; --text-light: #7a6a52; --primary: #b45309; --danger: #dc2626; --success: #15803d; --border: #e8dcc3; }
+        [data-theme="lavanda"] { --bg: #f5f3ff; --surface: #ffffff; --text: #1e1b3a; --text-light: #6b6890; --primary: #6d28d9; --danger: #e11d48; --success: #16a34a; --border: #ddd6fe; }
+        [data-theme="papel"] { --bg: #ffffff; --surface: #f4f4f5; --text: #09090b; --text-light: #52525b; --primary: #1d4ed8; --danger: #dc2626; --success: #15803d; --border: #d4d4d8; }
+        /* temas claros: textos sobre a cor principal e barra de baixo clara */
+        [data-tone="claro"] .parc-badge, [data-tone="claro"] .btn-primary, [data-tone="claro"] .dock-main { color: #fff; }
+        [data-tone="claro"] .dock { background: rgba(255, 255, 255, 0.95); border: 1px solid var(--border); }
 
         /* Comportamento de app nativo: sem puxar-para-atualizar, sem zoom por toque duplo, respeita o entalhe do celular */
         html, body { overscroll-behavior-y: none; overscroll-behavior-x: none; }
@@ -46,8 +61,8 @@
         .cloud-status.synced { color: var(--success); }
         .cloud-status.offline { color: var(--danger); }
 
-        .ajuste-btn { position: absolute; top: 10px; right: 50px; height: 32px; padding: 0 10px; box-sizing: border-box; border-radius: 8px; background: var(--surface); color: var(--primary); display: flex; align-items: center; gap: 4px; cursor: pointer; border: 1px solid var(--border); z-index: 100; font-size: 0.72rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-        @media (max-width: 380px) { .ajuste-btn { top: 48px; right: 10px; } }
+        .ajuste-btn { position: absolute; top: 10px; right: 50px; width: 32px; height: 32px; box-sizing: border-box; border-radius: 8px; background: var(--surface); color: var(--primary); display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1px solid var(--border); z-index: 100; }
+        .ajuste-btn.ativo { border-color: var(--primary); background: rgba(245,158,11,.12); }
         .aj-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; cursor: pointer; }
         .aj-linha input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--primary); flex: none; }
         .aj-hora { width: auto !important; padding: 8px !important; margin: 0 !important; }
@@ -213,6 +228,7 @@
         .helper { margin-bottom: 6px; }
         .aj-linha { padding: 6px 0; }
         .tree-header { padding: 4px 10px; }
+        .dock { justify-content: space-around; }
     </style>
 </head>
 <body>
@@ -265,7 +281,7 @@
 
     <!-- BOTÃO DE TEMA VOLTOU -->
     <div class="theme-btn" onclick="mudarTema()" title="Mudar Cores"><span class="material-icons-outlined" style="font-size:1.2rem;">palette</span></div>
-    <div class="ajuste-btn" onclick="abrirAjuste()" title="Abrir o menu Ajuste"><span class="material-icons-outlined" style="font-size:1.1rem;">tune</span>Ajuste</div>
+    <div class="ajuste-btn" id="btn-ajuste" onclick="abrirAjuste()" title="Ajuste" aria-label="Ajuste"><span class="material-icons-outlined" style="font-size:1.2rem;">tune</span></div>
 
     <div class="modal-overlay" id="modal-overlay" onclick="fecharModais()"></div>
 
@@ -276,7 +292,6 @@
             <div class="dock-item" id="icon-calendario" onclick="mudarTela('calendario','Calendário')"><span class="material-icons-outlined">event_note</span></div>
             <button class="dock-main" onclick="abrirModalLancamento()"><span class="material-icons-outlined">add</span></button>
             <div class="dock-item" id="icon-extrato" onclick="mudarTela('extrato','Cobranças e Extrato')"><span class="material-icons-outlined">receipt_long</span></div>
-            <div class="dock-item" id="icon-config" onclick="mudarTela('config','Ajuste')"><span class="material-icons-outlined">settings</span></div>
         </div>
     </div>
 
@@ -313,7 +328,7 @@
             <div class="form-group"><label>Categoria</label><select id="categoria-compra" class="form-input up-text"></select></div>
             <div class="edicao-field-row">
                 <div class="form-group" style="margin-bottom:0;"><label>Data Exata</label><input type="date" id="data-compra-exata" class="form-input" onchange="atualizarMesRefCompra()"></div>
-                <div class="form-group" style="margin-bottom:0;"><label>Mês na Fatura (1ª Parc)</label><input type="month" id="data-compra-ref" class="form-input"></div>
+                <div class="form-group" style="margin-bottom:0;"><label>Mês na Fatura (1ª parcela)</label><input type="month" id="data-compra-ref" class="form-input"></div>
             </div>
             
             <div class="form-group" style="margin-top: 15px;">
@@ -338,17 +353,18 @@
             <div class="form-group"><label>Quem está pagando / abatendo?</label><select id="pag-pessoa" class="form-input up-text" style="font-size: 1.2rem; color: var(--primary); border-color: var(--primary);"></select></div>
             <div class="form-group"><label>O que é este recebimento/abatimento?</label><input type="text" id="pag-desc" class="form-input" placeholder="Ex: Abatimento de dívida ou PIX Fulano"></div>
             <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 2; margin-bottom:0;"><label>Valor Total (R$)</label>
-                    <div style="display: flex; gap: 6px;"><input type="number" id="pag-valor" class="form-input input-destaque-receita" step="0.01" placeholder="0.00" style="padding: 10px;"><button class="btn-success" style="border-radius: 10px; width: 45px; border:none; display:flex; align-items:center; justify-content:center;" onclick="abrirCalc(this)"><span class="material-icons-outlined" style="font-size:1.3rem;">calculate</span></button></div>
+                <div class="form-group" style="flex: 2; margin-bottom:0;"><label id="pag-lbl-valor">Valor (R$)</label>
+                    <div style="display: flex; gap: 6px;"><input type="number" id="pag-valor" class="form-input input-destaque-receita" step="0.01" oninput="atualizarDicaPag()" placeholder="0.00" style="padding: 10px;"><button class="btn-success" style="border-radius: 10px; width: 45px; border:none; display:flex; align-items:center; justify-content:center;" onclick="abrirCalc(this)"><span class="material-icons-outlined" style="font-size:1.3rem;">calculate</span></button></div>
                 </div>
                 <div class="form-group" style="flex: 1.5; margin-bottom:0;"><label>Tipo</label>
                     <select id="pag-tipo" class="form-input up-text" style="font-size: 0.9rem; font-weight: 900; padding: 12px 6px;" onchange="mudarTipoLancamentoGlobal(this, 'box-parcelas-pag')"><option value="1">À VISTA</option><option value="P">PARCELADO</option><option value="A">MENSALIDADE</option></select>
                 </div>
-                <div class="form-group box-parcelas-pag" style="flex: 0.8; margin-bottom:0; display:none;"><label>Vezes</label><input type="number" id="pag-parcelas" class="form-input" value="2" style="font-size: 1.2rem; font-weight: 900; padding: 10px; text-align: center;"></div>
+                <div class="form-group box-parcelas-pag" style="flex: 0.8; margin-bottom:0; display:none;"><label>Vezes</label><input type="number" id="pag-parcelas" class="form-input" value="2" oninput="atualizarDicaPag()" style="font-size: 1.2rem; font-weight: 900; padding: 10px; text-align: center;"></div>
             </div>
+            <div id="pag-dica-total" style="display:none; font-size:0.72rem; color:var(--text-light); margin-top:6px;"></div>
             <div class="edicao-field-row" style="margin-top: 15px;">
                 <div class="form-group" style="margin-bottom:0;"><label>Data Exata</label><input type="date" id="pag-data" class="form-input"></div>
-                <div class="form-group" style="margin-bottom:0;"><label>Mês Referência na Fatura</label><input type="month" id="pag-data-ref" class="form-input"></div>
+                <div class="form-group" style="margin-bottom:0;"><label>Mês de referência na fatura</label><input type="month" id="pag-data-ref" class="form-input"></div>
             </div>
             
             <div class="form-group" style="margin-top: 15px;">
@@ -431,7 +447,7 @@
 
         <div class="edicao-field-row">
             <div class="form-group" style="margin-bottom:0;"><label id="edit-label-data-real">DATA EXATA</label><input type="date" id="edit-data-real" class="form-input"></div>
-            <div class="form-group" style="margin-bottom:0;" id="box-edit-fatura"><label>MÊS REFERÊNCIA</label><input type="month" id="edit-data-ref" class="form-input"></div>
+            <div class="form-group" style="margin-bottom:0;" id="box-edit-fatura"><label>MÊS DE REFERÊNCIA</label><input type="month" id="edit-data-ref" class="form-input"></div>
         </div>
 
         <div class="form-group" id="box-edit-comprovante" style="margin-top: 20px; display: none;">
@@ -450,7 +466,7 @@
         <div class="page-header">
             <div class="brand-line" style="margin-bottom: 0;">
                 <div class="brand-mark">CC</div>
-                <span class="brand-name">ControlCardMult <span class="v-badge">v4.0</span>
+                <span class="brand-name">ControlCardMult <span class="v-badge">v4.2</span>
                     <span id="cloud-status-icon" class="material-icons-outlined cloud-status synced" onclick="sincronizarManual(false, true)">cloud_done</span>
                 </span>
             </div>
@@ -551,13 +567,12 @@
                 <label class="aj-linha"><span>Lembrar de lançar as compras</span><input type="checkbox" id="aj-compras"></label>
                 <div class="aj-linha" style="cursor:default;"><span>Horário</span><input type="time" id="aj-compras-hora" class="form-input aj-hora"></div>
                 <label class="aj-linha"><span>Só avisar se ainda não lancei hoje</span><input type="checkbox" id="aj-so-nao-lancou"></label>
-                <p class="helper" style="margin:6px 0 2px;"><strong>Pessoas que acompanho</strong> (o aviso diz quem ficou sem lançamento hoje; vazio = aviso geral)</p>
-                <div id="aj-lista-pessoas"></div>
                 <div class="section-label">💳 Cartões</div>
                 <label class="aj-linha"><span>Avisar vencimento e melhor dia de compra</span><input type="checkbox" id="aj-cartoes"></label>
-                <div class="aj-linha" style="cursor:default;"><span>Horário</span><input type="time" id="aj-cartoes-hora" class="form-input aj-hora"></div>
+                <div class="aj-linha" style="cursor:default;"><span>Horário dos avisos de cartões e acordos</span><input type="time" id="aj-cartoes-hora" class="form-input aj-hora"></div>
                 <div class="aj-linha" style="cursor:default;"><span>Avisar o vencimento quantos dias antes?</span><input type="number" id="aj-dias-antes" class="form-input aj-hora" min="0" max="15" inputmode="numeric" style="width:70px !important;"></div>
                 <label class="aj-linha"><span>Avisar o melhor dia de compra</span><input type="checkbox" id="aj-melhor"></label>
+                <label class="aj-linha"><span>Avisar o vencimento dos acordos ($)</span><input type="checkbox" id="aj-acordos"></label>
                 <p class="helper" style="margin:6px 0 2px;"><strong>Cartões que acompanho</strong></p>
                 <div id="aj-lista-cartoes"></div>
                 <button class="btn btn-primary" style="margin-top:10px;" onclick="salvarAjuste()">SALVAR AVISOS</button>
@@ -613,7 +628,7 @@
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">layers</span><span class="acc-title">Gestão de Assinaturas e Parcelas</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
 <div class="acc-body">
                     <div class="form-group"><label>PESSOA:</label><select id="parc-pessoa" class="form-input up-text" style="padding:10px;" onchange="renderizarListaParcelamentos()"></select></div>
-                    <div id="lista-parcelamentos-container" style="margin: 12px 0;"><p style="color:var(--text-light); font-size:0.85rem; text-align:center;">Nenhum registo em andamento encontrado.</p></div>
+                    <div id="lista-parcelamentos-container" style="margin: 12px 0;"><p style="color:var(--text-light); font-size:0.85rem; text-align:center;">Nenhum registro em andamento encontrado.</p></div>
                 </div>
 </div>
             <div class="card acc-card">
@@ -647,7 +662,7 @@
             <div class="section-label">☁️ Nuvem e backup</div>
             <div class="card acc-card">
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">cloud_sync</span><span class="acc-title">Nuvem e backup</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
-<div class="acc-body"><p class="helper">Cada usuário usa a própria URL de nuvem; ela guarda só os seus dados.</p><input type="url" id="drive-webhook" class="form-input" style="font-size: 0.8rem; text-transform: none; padding:10px; border-color: rgba(239, 68, 68, 0.5); margin-bottom:10px;" placeholder="URL Webhook Google Drive" onchange="salvarWebhook()"><button class="btn btn-primary" style="margin-bottom:8px; padding:10px;" onclick="sincronizarManual(true, true)">FORÇAR ENVIO PARA NUVEM</button><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="sincronizarManual(false, true)">PUXAR DA NUVEM AGORA</button><hr style="border:1px solid var(--border); margin:10px 0;"><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="exportarBackup(false)"><span class="material-icons-outlined">download</span> Baixar Backup JSON (meus dados)</button><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="document.getElementById('import-file').click()"><span class="material-icons-outlined">file_upload</span> Importar Backup/Planilha ou Planilha (.xlsx)</button><input type="file" id="import-file" accept=".json,.xlsx,.xls" onchange="importarBackup(event)" style="display:none;"></div>
+<div class="acc-body"><p class="helper">A nuvem é única e fica com o administrador. Aqui você envia e baixa só a SUA aba, quando quiser.</p><button class="btn btn-primary" style="margin-bottom:8px; padding:10px;" onclick="sincronizarManual(true, true)">ENVIAR MINHA ABA PARA A NUVEM</button><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="sincronizarManual(false, true)">BAIXAR MINHA ABA DA NUVEM</button><hr style="border:1px solid var(--border); margin:10px 0;"><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="exportarBackup(false)"><span class="material-icons-outlined">download</span> Baixar Backup JSON (meus dados)</button><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="document.getElementById('import-file').click()"><span class="material-icons-outlined">file_upload</span> Importar backup ou planilha (.xlsx)</button><input type="file" id="import-file" accept=".json,.xlsx,.xls" onchange="importarBackup(event)" style="display:none;"></div>
 </div>
 
             <!-- ADMINISTRAÇÃO: só o que mexe com os usuários do sistema -->
@@ -665,6 +680,10 @@
                     <div id="admin-lista-usuarios"></div></div>
 </div>
                 <div class="card acc-card" style="border-color: var(--danger);">
+<div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">cloud_sync</span><span class="acc-title">Nuvem do app (URL única)</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
+<div class="acc-body"><p class="helper">Uma só URL para o app inteiro: o Google guarda cada usuário em uma aba da planilha. Para valer em todos os aparelhos, cole a linha abaixo no começo do script do index.html e suba o arquivo.</p><input type="url" id="drive-webhook" class="form-input" style="font-size: 0.8rem; text-transform: none; padding:10px; border-color: rgba(239, 68, 68, 0.5); margin-bottom:10px;" placeholder="URL do script do Google (única do app)" onchange="salvarWebhook()"><code id="linha-url-index" style="display:block; font-size:0.7rem; word-break:break-all; padding:8px; background:var(--bg); border:1px dashed var(--border); border-radius:8px; margin-bottom:6px; user-select:all;"></code></div>
+</div>
+                <div class="card acc-card" style="border-color: var(--danger);">
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">shield</span><span class="acc-title">Backup geral e reinício</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
 <div class="acc-body"><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="exportarBackupGeral()"><span class="material-icons-outlined">download</span> Baixar backup GERAL (todos os usuários)</button><button class="btn btn-danger" style="padding:10px;" onclick="adminZerarTudo()">ZERAR BASE COMPLETA</button></div>
 </div>
@@ -674,20 +693,33 @@
 </div>
 
 <script>
-    const APP_VERSION = '4.0';
+    const APP_VERSION = '4.2';
+    // URL ÚNICA da nuvem (Google Apps Script), do administrador: vale para todos os usuários e aparelhos.
+    // Cole a URL entre as aspas e suba o index.html. (O administrador também pode testar pelo campo em Ajuste > Administração.)
+    const URL_NUVEM_APP = '';
     const DB_NOME = 'ControlCard_Multi_DB'; 
     
     // Core de Temas
-    const temas = ['midnight', 'nubank', 'dracula', 'ocean'];
-    let temaAtual = localStorage.getItem('cc_tema') || 'midnight';
-    document.documentElement.setAttribute('data-theme', temaAtual);
+    const TEMAS = [
+        { id: 'midnight', nome: 'Meia-noite', tom: 'escuro' }, { id: 'nubank', nome: 'Nubank', tom: 'claro' }, { id: 'dracula', nome: 'Drácula', tom: 'escuro' }, { id: 'ocean', nome: 'Oceano', tom: 'claro' },
+        { id: 'ambar', nome: 'Âmbar', tom: 'escuro' }, { id: 'floresta', nome: 'Floresta', tom: 'escuro' }, { id: 'ameixa', nome: 'Ameixa', tom: 'escuro' }, { id: 'cobre', nome: 'Cobre', tom: 'escuro' },
+        { id: 'neon', nome: 'Neon', tom: 'escuro' }, { id: 'lagoa', nome: 'Lagoa', tom: 'escuro' }, { id: 'menta', nome: 'Menta', tom: 'claro' }, { id: 'algodao', nome: 'Algodão-doce', tom: 'claro' },
+        { id: 'areia', nome: 'Areia', tom: 'claro' }, { id: 'lavanda', nome: 'Lavanda', tom: 'claro' }, { id: 'papel', nome: 'Papel', tom: 'claro' }
+    ];
+    const temas = TEMAS.map(t => t.id);
+    let temaAtual = localStorage.getItem('cc_tema'); if (!temas.includes(temaAtual)) temaAtual = 'midnight';
+    function aplicarTema(id) {
+        const t = TEMAS.find(x => x.id === id) || TEMAS[0]; temaAtual = t.id;
+        document.documentElement.setAttribute('data-theme', t.id); document.documentElement.setAttribute('data-tone', t.tom);
+        try { localStorage.setItem('cc_tema', t.id); } catch (e) {}
+        return t;
+    }
+    aplicarTema(temaAtual);
 
     function mudarTema() {
-        let idx = temas.indexOf(temaAtual);
-        idx = (idx + 1) % temas.length;
-        temaAtual = temas[idx];
-        document.documentElement.setAttribute('data-theme', temaAtual);
-        localStorage.setItem('cc_tema', temaAtual);
+        const idx = (temas.indexOf(temaAtual) + 1) % temas.length;
+        const t = aplicarTema(temas[idx]);
+        toast(`Tema: ${t.nome} (${idx + 1}/${TEMAS.length})`);
     }
 
     /* ================= BANCO DE DADOS (v4): um banco separado por usuário =================
@@ -722,7 +754,7 @@
             const dono = usuarios.find(u => u.role === 'admin') || usuarios[0];
             const root = { versao: 'v4', usuarios, dados: {} };
             const ds = normalizarDataset(bruto);
-            if (dono) { root.dados[dono.id] = ds; const w = localStorage.getItem('cc_drive_webhook'); if (w && !localStorage.getItem('cc_drive_webhook_' + dono.id)) localStorage.setItem('cc_drive_webhook_' + dono.id, w); }
+            if (dono) root.dados[dono.id] = ds;
             else root.dados.__novo = ds;
             migrouParaV4 = true; return root;
         }
@@ -733,7 +765,14 @@
     function gravarRoot() { localStorage.setItem(DB_NOME, JSON.stringify(ROOT)); }
     if (migrouParaV4) { try { gravarRoot(); } catch (e) {} }
     function chavePendente() { return 'cc_pendente_envio_' + (typeof currentUser !== 'undefined' && currentUser ? currentUser.id : ''); }
-    function chaveWebhook() { return 'cc_drive_webhook_' + (typeof currentUser !== 'undefined' && currentUser ? currentUser.id : ''); }
+    function urlNuvem() { return (URL_NUVEM_APP || localStorage.getItem('cc_drive_webhook') || '').trim(); }
+    // Quem configurou a URL por usuário (versão 4.0) passa a usar a URL única
+    function migrarWebhookGlobal() {
+        if (localStorage.getItem('cc_drive_webhook')) return;
+        const ordem = ROOT.usuarios.filter(u => u.role === 'admin').concat(ROOT.usuarios);
+        for (const u of ordem) { const w = localStorage.getItem('cc_drive_webhook_' + u.id); if (w) { localStorage.setItem('cc_drive_webhook', w); return; } }
+    }
+    migrarWebhookGlobal();
     // Troca o banco do usuário logado (restauração, importação, nuvem) mantendo ROOT e db sincronizados
     function trocarDataset(ds) { ds = normalizarDataset(ds); ROOT.dados[typeof currentUser !== 'undefined' && currentUser ? currentUser.id : '__novo'] = ds; db = vincularDataset(ds); return db; }
     // Abre o banco do usuário que entrou (cria se não existir) e corrige referências quebradas
@@ -852,7 +891,7 @@
         if(u) {
             executarLoginReal(u, manterConectado());
         } else {
-            toast("Nome ou PIN Incorretos!", "erro");
+            toast("Nome ou PIN incorretos!", "erro");
             document.getElementById('login-pin').value = '';
         }
     }
@@ -1110,42 +1149,46 @@
     }
 
     /* ================= SYNC NUVEM ================= */
-    function carregarWebhook() { document.getElementById('drive-webhook').value = localStorage.getItem(chaveWebhook()) || ''; }
-    function salvarWebhook() { localStorage.setItem(chaveWebhook(), document.getElementById('drive-webhook').value.trim()); toast("URL Nuvem Salva!"); }
+    function carregarWebhook() {
+        const el = document.getElementById('drive-webhook'); if (el) el.value = localStorage.getItem('cc_drive_webhook') || '';
+        const linha = document.getElementById('linha-url-index'); if (linha) linha.textContent = "const URL_NUVEM_APP = '" + urlNuvem() + "';";
+    }
+    function salvarWebhook() { localStorage.setItem('cc_drive_webhook', document.getElementById('drive-webhook').value.trim()); carregarWebhook(); toast("URL da nuvem salva!"); }
     
-    // Cada usuário usa a PRÓPRIA URL de nuvem e envia só o PRÓPRIO banco
+    // Nuvem única (do administrador): cada usuário envia e baixa só a SUA aba (o script cria uma aba por usuário)
     function sincronizarManual(forcePush = false, clickUsuario = false) {
         if (!currentUser) return;
-        let url = localStorage.getItem(chaveWebhook());
-        if(!url || !navigator.onLine) {
-            if (clickUsuario) toast("URL da Nuvem não configurada ou Offline.", "erro");
-            return;
-        }
+        const url = urlNuvem();
+        if (!url) { if (clickUsuario) toast("A nuvem do app ainda não foi configurada (fale com o administrador).", "erro"); return; }
+        if (!navigator.onLine) { if (clickUsuario) toast("Sem internet.", "erro"); return; }
         const eu = currentUser, chPend = chavePendente();
         let icon = document.getElementById('cloud-status-icon');
         icon.innerText = 'cloud_sync'; icon.classList.remove('synced', 'offline');
+        const falhou = () => { icon.innerText = 'cloud_off'; icon.classList.add('offline'); };
 
         if(forcePush) {
-            fetch(url, { method: 'POST', body: JSON.stringify({ dados: pacoteDoUsuario(false), versao: "v4" }) })
-            .then(r => { localStorage.removeItem(chPend); icon.innerText = 'cloud_done'; icon.classList.add('synced'); if(clickUsuario) toast("Enviado para nuvem!"); })
-            .catch(e => { icon.innerText = 'cloud_off'; icon.classList.add('offline'); });
+            fetch(url, { method: 'POST', body: JSON.stringify({ usuario: eu.nome, dados: pacoteDoUsuario(false), versao: "v4" }) })
+            .then(r => { localStorage.removeItem(chPend); icon.innerText = 'cloud_done'; icon.classList.add('synced'); if(clickUsuario) toast("Sua aba foi enviada para a nuvem!"); })
+            .catch(falhou);
         } else {
-            fetch(url).then(r => r.json()).then(nuvem => {
+            fetch(url + (url.includes('?') ? '&' : '?') + 'usuario=' + encodeURIComponent(eu.nome)).then(r => r.json()).then(nuvem => {
                 if (!currentUser || currentUser.id !== eu.id) return; // trocou de usuário no meio do caminho
-                if(nuvem && Array.isArray(nuvem.despesas)) {
+                if (nuvem && nuvem.vazio) { // ainda não existe aba deste usuário: envia o que está no aparelho
+                    if (db.despesas.length || db.cartoes.length || db.pessoas.length) { sincronizarManual(true, clickUsuario); return; }
+                } else if (nuvem && Array.isArray(nuvem.despesas)) {
                     const deOutro = nuvem.usuarioNome ? nuvem.usuarioNome !== eu.nome : (Array.isArray(nuvem.usuarios) && nuvem.usuarios.length > 0 && !nuvem.usuarios.some(u => u.nome === eu.nome));
-                    if (deOutro) { if (clickUsuario) toast('Esta URL de nuvem guarda os dados de outro usuário. Use uma URL só sua.', 'erro'); icon.innerText = 'cloud_off'; icon.classList.add('offline'); return; }
+                    if (deOutro) { if (clickUsuario) toast('Os dados da nuvem pertencem a outro usuário.', 'erro'); falhou(); return; }
                     const pendente = localStorage.getItem(chPend) === '1';
                     if (pendente && !clickUsuario) { sincronizarManual(true, false); return; } // há alterações locais ainda não enviadas: envia em vez de sobrescrever
-                    if (clickUsuario && pendente && !confirm('Você tem alterações neste aparelho que ainda não foram enviadas. Puxar da nuvem vai SUBSTITUIR essas alterações. Continuar?')) return;
+                    if (clickUsuario && pendente && !confirm('Você tem alterações neste aparelho que ainda não foram enviadas. Baixar da nuvem vai SUBSTITUIR essas alterações. Continuar?')) { icon.innerText = 'cloud_done'; icon.classList.add('synced'); return; }
                     if(nuvem.despesas.length > db.despesas.length || clickUsuario) {
                         trocarDataset(nuvem); sanearDataset(db); try { gravarRoot(); } catch (e) {} localStorage.removeItem(chPend); carregarSelectsGerais();
                         atualizarTelaAtual();
-                        if(clickUsuario) toast("Sincronizado da Nuvem!");
+                        if(clickUsuario) toast("Sua aba foi baixada da nuvem!");
                     }
-                }
+                } else if (nuvem && nuvem.erro) { if (clickUsuario) toast('A nuvem respondeu: ' + nuvem.erro, 'erro'); falhou(); return; }
                 icon.innerText = 'cloud_done'; icon.classList.add('synced');
-            }).catch(e => { icon.innerText = 'cloud_off'; icon.classList.add('offline'); });
+            }).catch(falhou);
         }
     }
 
@@ -1212,6 +1255,7 @@
         document.getElementById('page-title').innerText = titulo;
         document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active-icon'));
         if(document.getElementById('icon-' + id)) document.getElementById('icon-' + id).classList.add('active-icon');
+        document.getElementById('btn-ajuste').classList.toggle('ativo', id === 'config');
         
         if(id === 'dashboard') atualizarSaldos();
         if(id === 'calendario') renderizarCalendario();
@@ -1518,7 +1562,7 @@
                 <div class="t-val" style="color:${isD ? 'var(--danger)' : 'var(--success)'};">${isD ? '' : '+ '}R$ ${val.toFixed(2)}</div>
             </div>`;
         }).join('');
-        document.getElementById('lista-transacoes-container').innerHTML = html || '<p style="color:var(--text-light); text-align:center; padding-top:20px;">Nenhum registo no período.</p>';
+        document.getElementById('lista-transacoes-container').innerHTML = html || '<p style="color:var(--text-light); text-align:center; padding-top:20px;">Nenhum registro no período.</p>';
     }
 
     function toggleExtratoSel(uid) {
@@ -1557,10 +1601,10 @@
     function abrirCalc(btn) { calcTargetInput = btn.previousElementSibling; calcExp = ""; document.getElementById('calc-display').innerText = "0"; document.getElementById('modal-calc').classList.add('open'); }
     function fecharCalc() { document.getElementById('modal-calc').classList.remove('open'); calcTargetInput = null; }
     function cBtn(val) { if(val === 'C') calcExp = ""; else calcExp += val; document.getElementById('calc-display').innerText = calcExp || "0"; }
-    function cConfirmar() { try { if(calcExp && calcTargetInput) calcTargetInput.value = eval(calcExp).toFixed(2); } catch(e){} fecharCalc(); }
+    function cConfirmar() { try { if(calcExp && calcTargetInput) calcTargetInput.value = eval(calcExp).toFixed(2); calcTargetInput.dispatchEvent(new Event('input', { bubbles: true })); } catch(e){} fecharCalc(); }
 
     function abrirModalLancamento() {
-        let hj = getLocalToday();
+        let hj = getLocalToday(); atualizarDicaPag();
         document.getElementById('data-compra-exata').value = hj; document.getElementById('data-compra-ref').value = hj.substring(0,7);
         document.getElementById('pag-data').value = hj; document.getElementById('pag-data-ref').value = hj.substring(0,7);
         document.getElementById('emp-data').value = hj; document.getElementById('emp-data-ref').value = hj.substring(0,7);
@@ -1590,7 +1634,17 @@
     function mudarTipoLancamentoGlobal(sel, classHideShow) {
         let box = sel.parentElement.parentElement.querySelector('.' + classHideShow);
         if(box) box.style.display = sel.value === 'P' ? 'block' : 'none';
+        if (sel.closest('.pagador-block')) atualizarDicaPagador(sel); else if (sel.id === 'pag-tipo') atualizarDicaPag();
     }
+    // Mostra "2x de R$ 100,00 = total de R$ 200,00" e troca o rótulo do valor conforme o tipo
+    function dicaParcela(valorEl, tipoEl, parcEl, labelEl, dicaEl) {
+        if (!valorEl || !tipoEl || !labelEl || !dicaEl) return;
+        const v = parseFloat(String(valorEl.value).replace(',', '.')); const q = parseInt(parcEl.value) || 2; const par = tipoEl.value === 'P';
+        labelEl.textContent = par ? 'Valor de cada parcela (R$)' : (tipoEl.value === 'A' ? 'Valor mensal (R$)' : 'Valor (R$)');
+        if (par && v > 0 && q > 1) { dicaEl.style.display = 'block'; dicaEl.textContent = `${q}x de ${brl(v)} = total de ${brl(v * q)}`; } else dicaEl.style.display = 'none';
+    }
+    function atualizarDicaPagador(el) { const b = el.closest('.pagador-block'); if (b) dicaParcela(b.querySelector('.valor-lanc'), b.querySelector('.tipo-lanc'), b.querySelector('.parcelas-lanc'), b.querySelector('.lbl-valor'), b.querySelector('.dica-total')); }
+    function atualizarDicaPag() { const g = id => document.getElementById(id); dicaParcela(g('pag-valor'), g('pag-tipo'), g('pag-parcelas'), g('pag-lbl-valor'), g('pag-dica-total')); }
 
     function addPagador() {
         const id = Date.now();
@@ -1602,10 +1656,11 @@
             <div class="form-group"><label>Quem vai pagar?</label><select class="form-input pessoa-lanc up-text" style="color:var(--primary); border-color:var(--primary);">${pSelect}</select></div>
             <div class="form-group"><label>Anotação específica (Opcional)</label><input type="text" class="form-input desc-lanc" placeholder="Ex: Tênis ou Mensalidade"></div>
             <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex:2; margin-bottom:0;"><label>Valor (R$)</label><div style="display: flex; gap: 6px;"><input type="number" class="form-input valor-lanc" step="0.01" style="color:var(--danger); padding:10px;"><button class="btn-primary" style="width: 45px; border-radius:10px;" onclick="abrirCalc(this)"><span class="material-icons-outlined">calculate</span></button></div></div>
+                <div class="form-group" style="flex:2; margin-bottom:0;"><label class="lbl-valor">Valor (R$)</label><div style="display: flex; gap: 6px;"><input type="number" class="form-input valor-lanc" step="0.01" oninput="atualizarDicaPagador(this)" style="color:var(--danger); padding:10px;"><button class="btn-primary" style="width: 45px; border-radius:10px;" onclick="abrirCalc(this)"><span class="material-icons-outlined">calculate</span></button></div></div>
                 <div class="form-group" style="flex:1.5; margin-bottom:0;"><label>Tipo</label><select class="form-input tipo-lanc up-text" style="padding:12px 6px;" onchange="mudarTipoLancamentoGlobal(this, 'box-parcelas')"><option value="1">À VISTA</option><option value="P">PARCELADO</option><option value="A">MENSALIDADE</option></select></div>
-                <div class="form-group box-parcelas" style="flex:0.8; margin-bottom:0; display:none;"><label>Vezes</label><input type="number" class="form-input parcelas-lanc" value="2" style="padding:10px;"></div>
+                <div class="form-group box-parcelas" style="flex:0.8; margin-bottom:0; display:none;"><label>Vezes</label><input type="number" class="form-input parcelas-lanc" value="2" oninput="atualizarDicaPagador(this)" style="padding:10px;"></div>
             </div>
+            <div class="dica-total" style="display:none; font-size:0.72rem; color:var(--text-light); margin-top:6px;"></div>
         </div>`;
         document.getElementById('pagadores-container').insertAdjacentHTML('beforeend', html);
     }
@@ -1637,8 +1692,8 @@
             if(!p || isNaN(v) || v<=0) return;
             let dFinal = descLoc || descGlobal || 'Compra Diversa';
             
-            // CORREÇÃO MATEMÁTICA: DIVIDIR O VALOR PELA QUANTIDADE DE PARCELAS
-            let valorCalculado = (tipo === 'P' && parc > 1) ? (v / parc) : v;
+            // Parcelado: o valor digitado é o de CADA parcela (2x de 100 = duas parcelas de 100)
+            let valorCalculado = v;
             
             for(let i=1; i<=parc; i++) {
                 let mRef = gerarMesVencimentoBase(dtRef, i);
@@ -1648,7 +1703,7 @@
             }
         });
 
-        if(transacoes.length === 0) return toast('Verifique se escolheu a PESSOA e um VALOR.', 'erro');
+        if(transacoes.length === 0) return toast('Verifique se escolheu a PESSOA e informou um VALOR.', 'erro');
         db.despesas.push(...transacoes); salvarDB(); fecharModais(); atualizarTelaAtual(); sincronizarManual(true); toast('Lançado com sucesso!');
     }
 
@@ -1658,10 +1713,10 @@
         let tipo = document.getElementById('pag-tipo').value; let isAss = tipo === 'A';
         let parc = tipo === 'P' ? parseInt(document.getElementById('pag-parcelas').value)||2 : (isAss ? 36 : 1);
 
-        if(!p || isNaN(v) || v<=0 || !dtReal || !dtRef) return toast('Preencha a pessoa, o valor e datas.', 'erro');
+        if(!p || isNaN(v) || v<=0 || !dtReal || !dtRef) return toast('Preencha a pessoa, o valor e as datas.', 'erro');
         
-        // CORREÇÃO MATEMÁTICA: DIVIDIR O VALOR SE FOR PARCELADO
-        let valorCalculado = (tipo === 'P' && parc > 1) ? (v / parc) : v;
+        // Parcelado: o valor digitado é o de CADA parcela
+        let valorCalculado = v;
 
         let tr = []; let idB = Date.now();
         let cidP = null; if (base64Pag) { cidP = 'c_' + idB; db.comprovantes = db.comprovantes || {}; db.comprovantes[cidP] = base64Pag; }
@@ -1669,7 +1724,7 @@
             let mRef = gerarMesVencimentoBase(dtRef, i); let dShow = (tipo === 'P' && parc > 1) ? `${desc} (${i}/${parc})` : desc;
             tr.push({ id: idB + i, desc: dShow, pessoa: p, valor: parseFloat(valorCalculado.toFixed(2)), data: dtReal, dataRef: mRef, comprovante: null, comprovanteId: cidP, isAssinatura: isAss, assinaturaId: isAss ? `ass_p_${idB}_${p}` : null });
         }
-        db.pagamentos.push(...tr); salvarDB(); fecharModais(); atualizarTelaAtual(); sincronizarManual(true); toast('Recebido confirmado!');
+        db.pagamentos.push(...tr); salvarDB(); fecharModais(); atualizarTelaAtual(); sincronizarManual(true); toast('Recebimento confirmado!');
     }
 
     function calcularParcelaEmpPorTotal() {
@@ -1940,7 +1995,7 @@
 
     /* ================= PUSH E BACKUP DO PERFIL ================= */
     /* ================= AVISOS (PUSH) COM O APP ABERTO — cada usuário configura o seu ================= */
-    const PUSH_PADRAO = { ativo: true, compras: true, comprasHora: '21:00', soSeNaoLancou: true, listaPessoas: [], cartoes: true, cartoesHora: '09:00', diasAntes: 3, melhorDia: true, listaCartoes: null, bloqueio: '5' };
+    const PUSH_PADRAO = { ativo: true, compras: true, comprasHora: '21:00', soSeNaoLancou: true, cartoes: true, acordos: true, cartoesHora: '09:00', diasAntes: 3, melhorDia: true, listaCartoes: null, bloqueio: '5' };
     const pushPad = n => String(n).padStart(2, '0');
     function pushCfg(user) { try { return Object.assign({}, PUSH_PADRAO, JSON.parse(localStorage.getItem('cc_push_cfg_' + user.id) || '{}')); } catch (e) { return Object.assign({}, PUSH_PADRAO); } }
     function pushHoje(agora) { return `${agora.getFullYear()}-${pushPad(agora.getMonth() + 1)}-${pushPad(agora.getDate())}`; } // data LOCAL (não UTC)
@@ -1954,21 +2009,28 @@
         return Math.round((alvo - hoje) / 86400000);
     }
     function cartoesAtivosNomes() { return (db.cartoes || []).filter(c => !(db.cartoesInativos || []).includes(c.nome || c)).map(c => c.nome || c); }
-    function pessoasAtivasNomes() { return (db.pessoas || []).filter(p => !(db.pessoasInativas || []).includes(p)).sort(); }
     // Cartões acompanhados: os escolhidos no Ajuste; sem escolha, todos os SEUS cartões ativos
     function pushCartoesSeguidos(cfg) { const ativos = cartoesAtivosNomes(); return Array.isArray(cfg.listaCartoes) ? cfg.listaCartoes.filter(n => ativos.includes(n)) : ativos; }
+    // Parcelas de acordos ($) que vencem de hoje até "diasAntes" dias (dia = dia da data do lançamento; mês = mês de referência)
+    function acordosAVencer(agora, diasAntes) {
+        const hoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate()); const out = [];
+        db.despesas.forEach(d => {
+            if (!d.isEmprestimo || !d.dataRef) return;
+            const [a, m] = d.dataRef.split('-').map(Number); const dia = d.dataCompra ? parseInt(d.dataCompra.split('-')[2]) : 10;
+            const venc = new Date(a, m - 1, Math.min(dia || 10, ultimoDiaMes(a, m - 1)));
+            const dias = Math.round((venc - hoje) / 86400000);
+            if (dias >= 0 && dias <= diasAntes) out.push({ d, dias });
+        });
+        return out.sort((x, y) => x.dias - y.dias);
+    }
     // Calcula o que avisar hoje (função pura, sem horário nem "já enviado")
     function pushCalcular(cfg, agora, opts) {
-        opts = opts || {}; const out = { compras: null, cartoes: [] };
+        opts = opts || {}; const out = { compras: null, cartoes: [], acordos: [] };
         if (cfg.compras) {
-            const hoje = pushHoje(agora); const deHoje = db.despesas.filter(d => d.dataCompra === hoje);
-            const seguidas = (cfg.listaPessoas || []).filter(p => pessoasAtivasNomes().includes(p));
-            if (seguidas.length) {
-                const faltam = seguidas.filter(p => !deHoje.some(d => d.pessoa === p));
-                if (faltam.length) out.compras = `📝 Hora de lançar as compras de hoje. Sem lançamento hoje: ${faltam.join(', ')}`;
-                else if (opts.ignorarJaLancou || !cfg.soSeNaoLancou) out.compras = '📝 Hora de lançar as compras de hoje!';
-            } else if (opts.ignorarJaLancou || !(cfg.soSeNaoLancou && deHoje.length > 0)) out.compras = '📝 Hora de lançar as compras de hoje!';
+            const hoje = pushHoje(agora); const jaLancou = db.despesas.some(d => d.dataCompra === hoje);
+            if (opts.ignorarJaLancou || !(cfg.soSeNaoLancou && jaLancou)) out.compras = '📝 Hora de lançar as compras de hoje!';
         }
+        const diasAntes = Math.max(0, parseInt(cfg.diasAntes) || 0);
         if (cfg.cartoes) {
             const seguidos = pushCartoesSeguidos(cfg);
             db.cartoes.forEach(c => {
@@ -1977,10 +2039,18 @@
                 if (v) {
                     const dias = diasAteDia(agora, v);
                     if (dias === 0) out.cartoes.push(`⚠️ ${nome}: VENCE HOJE!`);
-                    else if (dias <= Math.max(0, parseInt(cfg.diasAntes) || 0)) out.cartoes.push(`⏰ ${nome}: vence ${dias === 1 ? 'amanhã' : 'em ' + dias + ' dias'} (dia ${v})`);
+                    else if (dias <= diasAntes) out.cartoes.push(`⏰ ${nome}: vence ${dias === 1 ? 'amanhã' : 'em ' + dias + ' dias'} (dia ${v})`);
                 }
                 if (cfg.melhorDia && diaValido(c.fechamento) && agora.getDate() === Math.min(cartaoMelhorDia(c), ultimoDiaMes(agora.getFullYear(), agora.getMonth()))) out.cartoes.push(`✅ ${nome}: melhor dia para comprar!`);
             });
+        }
+        if (cfg.acordos) {
+            const lista = acordosAVencer(agora, diasAntes);
+            lista.slice(0, 6).forEach(({ d, dias }) => {
+                const m = (d.desc || '').match(/\((\d+)\/(\d+)\)\s*$/); const base = (d.desc || 'Acordo').replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+                out.acordos.push(`💲 ${base}${m ? ' ' + m[1] + '/' + m[2] : ''} (${d.pessoa}): ${dias === 0 ? 'VENCE HOJE' : dias === 1 ? 'vence amanhã' : 'vence em ' + dias + ' dias'} — ${brl(getValorAjustadoEmprestimo(d))}`);
+            });
+            if (lista.length > 6) out.acordos.push(`…e mais ${lista.length - 6} acordo(s) a vencer.`);
         }
         return out;
     }
@@ -2016,10 +2086,10 @@
             const r = pushCalcular(Object.assign({}, cfg, { cartoes: false }), agora);
             if (r.compras) secoes.push({ titulo: 'ControlCard — Compras do dia', linhas: [r.compras], acao: 'lancar' });
         }
-        if (cfg.cartoes && hm >= cfg.cartoesHora && localStorage.getItem(marca('cartoes')) !== hoje) {
+        if ((cfg.cartoes || cfg.acordos) && hm >= cfg.cartoesHora && localStorage.getItem(marca('cartoes')) !== hoje) {
             localStorage.setItem(marca('cartoes'), hoje);
-            const r = pushCalcular(Object.assign({}, cfg, { compras: false }), agora);
-            if (r.cartoes.length) secoes.push({ titulo: 'ControlCard — Cartões', linhas: r.cartoes });
+            const r = pushCalcular(Object.assign({}, cfg, { compras: false }), agora); const linhas = r.cartoes.concat(r.acordos);
+            if (linhas.length) secoes.push({ titulo: 'ControlCard — Cartões e acordos', linhas });
         }
         pushEntregar(secoes);
     }
@@ -2046,18 +2116,17 @@
         if (!currentUser) return;
         const cfg = pushCfg(currentUser); const set = (id, v) => { const e = document.getElementById(id); if (!e) return; if (e.type === 'checkbox') e.checked = !!v; else e.value = v; };
         set('aj-ativo', cfg.ativo); set('aj-compras', cfg.compras); set('aj-compras-hora', cfg.comprasHora); set('aj-so-nao-lancou', cfg.soSeNaoLancou);
-        set('aj-cartoes', cfg.cartoes); set('aj-cartoes-hora', cfg.cartoesHora); set('aj-dias-antes', cfg.diasAntes); set('aj-melhor', cfg.melhorDia); set('aj-bloqueio', cfg.bloqueio);
+        set('aj-cartoes', cfg.cartoes); set('aj-acordos', cfg.acordos); set('aj-cartoes-hora', cfg.cartoesHora); set('aj-dias-antes', cfg.diasAntes); set('aj-melhor', cfg.melhorDia); set('aj-bloqueio', cfg.bloqueio);
         document.getElementById('aj-permissao').innerText = textoPermissaoAvisos();
-        const pSeg = (cfg.listaPessoas || []); const cSeg = pushCartoesSeguidos(cfg);
-        document.getElementById('aj-lista-pessoas').innerHTML = pessoasAtivasNomes().map(p => `<label class="aj-linha"><span>${escHtml(p)}</span><input type="checkbox" class="aj-pessoa" data-n="${encodeURIComponent(p)}" ${pSeg.includes(p) ? 'checked' : ''}></label>`).join('') || '<p class="helper">Nenhuma pessoa cadastrada.</p>';
+        const cSeg = pushCartoesSeguidos(cfg);
         document.getElementById('aj-lista-cartoes').innerHTML = (db.cartoes || []).filter(c => cartoesAtivosNomes().includes(c.nome || c)).map(c => { const n = c.nome || c; return `<label class="aj-linha"><span>${escHtml(n)}${cartaoSemConferir(c) ? ' <span style="color:var(--primary); font-size:0.7rem;">⚠️ conferir dias</span>' : ''}</span><input type="checkbox" class="aj-cartao" data-n="${encodeURIComponent(n)}" ${cSeg.includes(n) ? 'checked' : ''}></label>`; }).join('') || '<p class="helper">Nenhum cartão cadastrado.</p>';
     }
     function lerFormAjuste() {
         const g = id => document.getElementById(id);
         const hora = (id, padrao) => /^\d{2}:\d{2}$/.test(g(id).value) ? g(id).value : padrao;
         const marcados = cls => [...document.querySelectorAll(cls + ':checked')].map(e => decodeURIComponent(e.dataset.n));
-        return { ativo: g('aj-ativo').checked, compras: g('aj-compras').checked, comprasHora: hora('aj-compras-hora', PUSH_PADRAO.comprasHora), soSeNaoLancou: g('aj-so-nao-lancou').checked, listaPessoas: marcados('.aj-pessoa'),
-            cartoes: g('aj-cartoes').checked, cartoesHora: hora('aj-cartoes-hora', PUSH_PADRAO.cartoesHora), diasAntes: Math.min(15, Math.max(0, parseInt(g('aj-dias-antes').value) || 0)), melhorDia: g('aj-melhor').checked,
+        return { ativo: g('aj-ativo').checked, compras: g('aj-compras').checked, comprasHora: hora('aj-compras-hora', PUSH_PADRAO.comprasHora), soSeNaoLancou: g('aj-so-nao-lancou').checked,
+            cartoes: g('aj-cartoes').checked, acordos: g('aj-acordos').checked, cartoesHora: hora('aj-cartoes-hora', PUSH_PADRAO.cartoesHora), diasAntes: Math.min(15, Math.max(0, parseInt(g('aj-dias-antes').value) || 0)), melhorDia: g('aj-melhor').checked,
             listaCartoes: marcados('.aj-cartao'), bloqueio: g('aj-bloqueio').value || PUSH_PADRAO.bloqueio };
     }
     function salvarAjuste() {
@@ -2069,7 +2138,7 @@
         const cfg = lerFormAjuste(); const r = pushCalcular(cfg, new Date(), { ignorarJaLancou: true });
         const secoes = [];
         if (r.compras) secoes.push({ titulo: 'Teste — Compras do dia', linhas: [r.compras], acao: 'lancar' });
-        if (r.cartoes.length) secoes.push({ titulo: 'Teste — Cartões', linhas: r.cartoes });
+        if (r.cartoes.length || r.acordos.length) secoes.push({ titulo: 'Teste — Cartões e acordos', linhas: r.cartoes.concat(r.acordos) });
         if (!secoes.length) secoes.push({ titulo: 'Teste', linhas: ['Nada para avisar hoje com estes ajustes.'] });
         mostrarAvisoApp(secoes);
     }
@@ -2165,7 +2234,7 @@
                 <div style="background:var(--primary); color:#000; padding:4px 8px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="${mainClick}">${g[0].isAssinatura?'🔁':g.length+'x'}</div>
             </div>`;
         }
-        document.getElementById('lista-parcelamentos-container').innerHTML = html || '<p style="color:var(--text-light); font-size:0.85rem; text-align:center;">Nenhum registo em andamento.</p>';
+        document.getElementById('lista-parcelamentos-container').innerHTML = html || '<p style="color:var(--text-light); font-size:0.85rem; text-align:center;">Nenhum registro em andamento.</p>';
     }
 
     let transSelecionados = new Set();
