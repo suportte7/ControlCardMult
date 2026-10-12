@@ -60,6 +60,7 @@
         .cloud-status { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 11px; font-size: 1rem; color: var(--text-light); transition: 0.3s; cursor: pointer;}
         .cloud-status.synced { color: var(--success); }
         .cloud-status.offline { color: var(--danger); }
+        .cloud-status.sem-nuvem { color: var(--text-light); opacity: 0.55; }
 
         .ajuste-btn { position: absolute; top: 10px; right: 50px; width: 32px; height: 32px; box-sizing: border-box; border-radius: 8px; background: var(--surface); color: var(--primary); display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1px solid var(--border); z-index: 100; }
         .ajuste-btn.ativo { border-color: var(--primary); background: rgba(245,158,11,.12); }
@@ -239,6 +240,7 @@
         <div class="brand-mark" style="width: 60px; height: 60px; font-size: 1.8rem; margin: 0 auto 10px; border-radius: 14px;">CC</div>
         <h2 style="color: var(--text); margin: 0; font-weight: 900; letter-spacing: 1px; font-size: 1.4rem;" id="login-main-title">ACESSO SEGURO</h2>
         <p style="color: var(--text-light); font-size: 0.85rem; margin: 5px 0 15px;" id="login-subtitle">Informe seus dados para continuar</p>
+        <p id="login-aviso-novo" style="display:none; color: var(--text-light); font-size: 0.72rem; line-height: 1.4; margin: -6px 0 14px; padding: 8px 10px; border: 1px dashed var(--border); border-radius: 10px;">Este aparelho ainda não tem nenhum usuário. O acesso criado aqui é o administrador <strong>só deste aparelho</strong>: os dados não vêm de outros aparelhos até a nuvem do app ser configurada. Para entrar com um usuário que já existe, use o mesmo nome e depois baixe a sua aba em Ajuste.</p>
     </div>
     
     <div id="login-form-area" class="login-box">
@@ -468,7 +470,7 @@
             <div class="brand-line" style="margin-bottom: 0;">
                 <div class="brand-mark">CC</div>
                 <span class="brand-name">ControlCardMult <span class="v-badge" id="v-badge"></span>
-                    <span id="cloud-status-icon" class="material-icons-outlined cloud-status synced" onclick="sincronizarManual(false, true)">cloud_done</span>
+                    <span id="cloud-status-icon" class="material-icons-outlined cloud-status sem-nuvem" title="Nuvem não configurada" onclick="sincronizarManual(false, true)">cloud_off</span>
                 </span>
             </div>
             <div style="font-size: 0.65rem; color: var(--text-light); margin-left: 34px; margin-bottom: 8px; font-weight: 800; text-transform: uppercase;">PERFIL DE ACESSO: <span id="header-user-name" style="color:var(--primary);">...</span></div>
@@ -717,7 +719,7 @@
 </div>
 
 <script>
-    const APP_VERSION = '4.3'; // única fonte da versão; mude também o version.json (veja o LEIA-ME)
+    const APP_VERSION = '4.4'; // única fonte da versão; mude também o version.json (veja o LEIA-ME)
     // URL ÚNICA da nuvem (Google Apps Script), do administrador: vale para todos os usuários e aparelhos.
     // Cole a URL entre as aspas e suba o index.html. (O administrador também pode testar pelo campo em Ajuste > Administração.)
     const URL_NUVEM_APP = '';
@@ -888,12 +890,14 @@
         if (usersAtivos.length === 0) {
             document.getElementById('login-main-title').innerText = "CRIAR ADMIN";
             document.getElementById('login-subtitle').innerText = "Defina seu acesso Mestre";
+            document.getElementById('login-aviso-novo').style.display = 'block';
             document.getElementById('btn-importar-login').style.display = 'block';
             return;
         }
 
         document.getElementById('login-main-title').innerText = "ACESSO SEGURO";
         document.getElementById('login-subtitle').innerText = "Informe seus dados para continuar";
+        document.getElementById('login-aviso-novo').style.display = 'none';
         document.getElementById('btn-importar-login').style.display = 'none';
     }
 
@@ -1190,16 +1194,17 @@
     function sincronizarManual(forcePush = false, clickUsuario = false) {
         if (!currentUser) return;
         const url = urlNuvem();
-        if (!url) { if (clickUsuario) toast("A nuvem do app ainda não foi configurada (fale com o administrador).", "erro"); return; }
-        if (!navigator.onLine) { if (clickUsuario) toast("Sem internet.", "erro"); return; }
+        const icon = document.getElementById('cloud-status-icon');
+        const estado = (nome, texto, dica) => { icon.innerText = texto; icon.classList.remove('synced', 'offline', 'sem-nuvem'); if (nome) icon.classList.add(nome); icon.title = dica || ''; };
+        if (!url) { estado('sem-nuvem', 'cloud_off', 'Nuvem não configurada: os dados ficam só neste aparelho'); if (clickUsuario) toast("A nuvem do app ainda não foi configurada (fale com o administrador). Seus dados ficam só neste aparelho.", "erro"); return; }
+        if (!navigator.onLine) { estado('offline', 'cloud_off', 'Sem internet'); if (clickUsuario) toast("Sem internet.", "erro"); return; }
         const eu = currentUser, chPend = chavePendente();
-        let icon = document.getElementById('cloud-status-icon');
-        icon.innerText = 'cloud_sync'; icon.classList.remove('synced', 'offline');
-        const falhou = () => { icon.innerText = 'cloud_off'; icon.classList.add('offline'); };
+        estado('', 'cloud_sync', 'Sincronizando...');
+        const falhou = () => { icon.innerText = 'cloud_off'; icon.classList.add('offline'); icon.title = 'Falha ao sincronizar'; };
 
         if(forcePush) {
             fetch(url, { method: 'POST', body: JSON.stringify({ usuario: eu.nome, dados: pacoteDoUsuario(false), versao: "v4" }) })
-            .then(r => { localStorage.removeItem(chPend); icon.innerText = 'cloud_done'; icon.classList.add('synced'); if(clickUsuario) toast("Sua aba foi enviada para a nuvem!"); })
+            .then(r => { localStorage.removeItem(chPend); icon.innerText = 'cloud_done'; icon.classList.add('synced'); icon.title = 'Sincronizado'; if(clickUsuario) toast("Sua aba foi enviada para a nuvem!"); })
             .catch(falhou);
         } else {
             fetch(url + (url.includes('?') ? '&' : '?') + 'usuario=' + encodeURIComponent(eu.nome)).then(r => r.json()).then(nuvem => {
@@ -1211,14 +1216,14 @@
                     if (deOutro) { if (clickUsuario) toast('Os dados da nuvem pertencem a outro usuário.', 'erro'); falhou(); return; }
                     const pendente = localStorage.getItem(chPend) === '1';
                     if (pendente && !clickUsuario) { sincronizarManual(true, false); return; } // há alterações locais ainda não enviadas: envia em vez de sobrescrever
-                    if (clickUsuario && pendente && !confirm('Você tem alterações neste aparelho que ainda não foram enviadas. Baixar da nuvem vai SUBSTITUIR essas alterações. Continuar?')) { icon.innerText = 'cloud_done'; icon.classList.add('synced'); return; }
+                    if (clickUsuario && pendente && !confirm('Você tem alterações neste aparelho que ainda não foram enviadas. Baixar da nuvem vai SUBSTITUIR essas alterações. Continuar?')) { icon.innerText = 'cloud_done'; icon.classList.add('synced'); icon.title = 'Sincronizado'; return; }
                     if(nuvem.despesas.length > db.despesas.length || clickUsuario) {
                         criarSnapshot('Antes de baixar da nuvem'); trocarDataset(nuvem); sanearDataset(db); try { gravarRoot(); } catch (e) {} localStorage.removeItem(chPend); carregarSelectsGerais();
                         atualizarTelaAtual();
                         if(clickUsuario) toast("Sua aba foi baixada da nuvem!");
                     }
                 } else if (nuvem && nuvem.erro) { if (clickUsuario) toast('A nuvem respondeu: ' + nuvem.erro, 'erro'); falhou(); return; }
-                icon.innerText = 'cloud_done'; icon.classList.add('synced');
+                icon.innerText = 'cloud_done'; icon.classList.add('synced'); icon.title = 'Sincronizado';
             }).catch(falhou);
         }
     }
