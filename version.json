@@ -1,11 +1,8 @@
 {
-  "versao": "4.3",
-  "data": "2026-10-11",
+  "versao": "4.4",
+  "data": "2026-10-12",
   "notas": [
-    "Atualização automática: o app confere sozinho e se atualiza sem você sair dele.",
-    "Trocar o PIN e cadastrar e-mail em Ajuste > Meu PIN e e-mail; \"Esqueci meu PIN\" na tela de entrada.",
-    "Versões dos dados: pontos de restauração automáticos e botão RESTAURAR.",
-    "Administração: restaurar backup geral por arquivo.",
-    "Valor parcelado = valor de cada parcela; 15 temas; botão Desconectar discreto."
+    "O ícone de nuvem agora só fica verde quando a sincronização realmente funcionou (cinza = nuvem não configurada, vermelho = sem internet ou falha).",
+    "Aparelho novo: a tela de primeiro acesso explica que o administrador criado ali é só daquele aparelho."
   ]
 }
