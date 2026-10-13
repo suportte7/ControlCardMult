@@ -1,8 +1,8 @@
 {
-  "versao": "4.4",
-  "data": "2026-10-12",
+  "versao": "4.5",
+  "data": "2026-10-13",
   "notas": [
-    "O ícone de nuvem agora só fica verde quando a sincronização realmente funcionou (cinza = nuvem não configurada, vermelho = sem internet ou falha).",
-    "Aparelho novo: a tela de primeiro acesso explica que o administrador criado ali é só daquele aparelho."
+    "A URL da nuvem agora fica no arquivo config.json (enviado uma vez ao servidor): novas versões do app não precisam mais dela.",
+    "Em Ajuste > Administração > Nuvem do app, o botão BAIXAR config.json gera o arquivo pronto e mostra se o servidor já o tem."
   ]
 }
