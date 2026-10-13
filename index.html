@@ -707,7 +707,7 @@
 </div>
                 <div class="card acc-card" style="border-color: var(--danger);">
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">cloud_sync</span><span class="acc-title">Nuvem do app (URL única)</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
-<div class="acc-body"><p class="helper">Uma só URL para o app inteiro: o Google guarda cada usuário em uma aba da planilha. Para valer em todos os aparelhos, cole a linha abaixo no começo do script do index.html e suba o arquivo.</p><input type="url" id="drive-webhook" class="form-input" style="font-size: 0.8rem; text-transform: none; padding:10px; border-color: rgba(239, 68, 68, 0.5); margin-bottom:10px;" placeholder="URL do script do Google (única do app)" onchange="salvarWebhook()"><code id="linha-url-index" style="display:block; font-size:0.7rem; word-break:break-all; padding:8px; background:var(--bg); border:1px dashed var(--border); border-radius:8px; margin-bottom:6px; user-select:all;"></code></div>
+<div class="acc-body"><p class="helper">Uma só URL para o app inteiro: o Google guarda cada usuário em uma aba da planilha. Cole a URL aqui (vale neste aparelho) e toque em BAIXAR config.json. Suba esse arquivo UMA vez na mesma pasta do index.html: daí todos os aparelhos usam a URL, e as próximas versões do app nunca precisam dela de novo.</p><input type="url" id="drive-webhook" class="form-input" style="font-size: 0.8rem; text-transform: none; padding:10px; border-color: rgba(239, 68, 68, 0.5); margin-bottom:10px;" placeholder="URL do script do Google (única do app)" onchange="salvarWebhook()"><button class="btn btn-outline" style="margin-bottom:8px; padding:10px;" onclick="baixarConfigNuvem()"><span class="material-icons-outlined">download</span> BAIXAR config.json</button><p class="helper" id="status-config-nuvem" style="margin:0;"></p></div>
 </div>
                 <div class="card acc-card" style="border-color: var(--danger);">
 <div class="acc-head" onclick="toggleAcc(this)"><span class="material-icons-outlined">shield</span><span class="acc-title">Backup geral e reinício</span><span class="material-icons-outlined acc-chev">expand_more</span></div>
@@ -719,9 +719,8 @@
 </div>
 
 <script>
-    const APP_VERSION = '4.4'; // única fonte da versão; mude também o version.json (veja o LEIA-ME)
-    // URL ÚNICA da nuvem (Google Apps Script), do administrador: vale para todos os usuários e aparelhos.
-    // Cole a URL entre as aspas e suba o index.html. (O administrador também pode testar pelo campo em Ajuste > Administração.)
+    const APP_VERSION = '4.5'; // única fonte da versão; mude também o version.json (veja o LEIA-ME)
+    // (Opcional) URL da nuvem direto no código. O normal é usar o config.json (veja o LEIA-ME): ele é enviado uma vez e as novas versões do app não o substituem.
     const URL_NUVEM_APP = '';
     const DB_NOME = 'ControlCard_Multi_DB'; 
     
@@ -795,7 +794,20 @@
     function gravarRoot() { localStorage.setItem(DB_NOME, JSON.stringify(ROOT)); }
     if (migrouParaV4) { try { gravarRoot(); } catch (e) {} }
     function chavePendente() { return 'cc_pendente_envio_' + (typeof currentUser !== 'undefined' && currentUser ? currentUser.id : ''); }
-    function urlNuvem() { return (URL_NUVEM_APP || localStorage.getItem('cc_drive_webhook') || '').trim(); }
+    // URL da nuvem: 1) a salva pelo administrador neste aparelho; 2) a do arquivo config.json do servidor (subido UMA vez; as atualizações do app nunca o substituem); 3) a constante do index
+    let urlConfigServidor = localStorage.getItem('cc_url_config') || '', statusConfigServidor = 'pendente'; // 'ok' | 'ausente' | 'pendente'
+    function urlNuvem() { return (localStorage.getItem('cc_drive_webhook') || urlConfigServidor || URL_NUVEM_APP || '').trim(); }
+    async function carregarConfigNuvem() {
+        try {
+            const r = await fetch('config.json?t=' + Date.now(), { cache: 'no-store' });
+            if (!r.ok) throw new Error('sem config');
+            const c = await r.json(); const u = c && typeof c.urlNuvem === 'string' ? c.urlNuvem.trim() : '';
+            if (/^https:\/\/script\.google\.com\//.test(u)) { urlConfigServidor = u; try { localStorage.setItem('cc_url_config', u); } catch (e) {} statusConfigServidor = 'ok'; }
+            else statusConfigServidor = navigator.onLine ? 'ausente' : 'pendente';
+        } catch (e) { statusConfigServidor = navigator.onLine ? 'ausente' : 'pendente'; }
+        carregarWebhook();
+    }
+    const promessaConfig = carregarConfigNuvem();
     // Quem configurou a URL por usuário (versão 4.0) passa a usar a URL única
     function migrarWebhookGlobal() {
         if (localStorage.getItem('cc_drive_webhook')) return;
@@ -948,7 +960,7 @@
         montarFiltrosGlobais();
         carregarSelectsGerais();
         restaurarTelaDepoisDeAtualizar();
-        sincronizarManual(false, false); 
+        promessaConfig.then(() => sincronizarManual(false, false)); 
         iniciarPushDiario();
         iniciarBloqueio(manter === undefined);
     }
@@ -1185,10 +1197,18 @@
 
     /* ================= SYNC NUVEM ================= */
     function carregarWebhook() {
-        const el = document.getElementById('drive-webhook'); if (el) el.value = localStorage.getItem('cc_drive_webhook') || '';
-        const linha = document.getElementById('linha-url-index'); if (linha) linha.textContent = "const URL_NUVEM_APP = '" + urlNuvem() + "';";
+        const el = document.getElementById('drive-webhook'); const local = localStorage.getItem('cc_drive_webhook') || ''; if (el) el.value = local;
+        const st = document.getElementById('status-config-nuvem'); if (!st) return;
+        if (statusConfigServidor === 'ok') st.textContent = '✅ config.json encontrado no servidor' + (local && local !== urlConfigServidor ? ', mas a URL dele é DIFERENTE da salva neste aparelho (aqui vale a deste aparelho; os outros usam a do servidor).' : ': todos os aparelhos usam essa URL.');
+        else if (statusConfigServidor === 'ausente') st.textContent = '⚠️ config.json NÃO encontrado no servidor: os outros aparelhos ainda não têm a URL. Toque em BAIXAR config.json e suba o arquivo UMA vez, na mesma pasta do index.html.';
+        else st.textContent = 'Conferindo o servidor...';
     }
-    function salvarWebhook() { localStorage.setItem('cc_drive_webhook', document.getElementById('drive-webhook').value.trim()); carregarWebhook(); toast("URL da nuvem salva!"); }
+    function baixarConfigNuvem() {
+        const u = (localStorage.getItem('cc_drive_webhook') || urlNuvem() || '').trim();
+        if (!u) return toast('Cole primeiro a URL do script do Google no campo acima.', 'erro');
+        baixarJson({ urlNuvem: u }, 'config.json'); toast('config.json baixado. Suba esse arquivo na mesma pasta do index.html (uma vez só).');
+    }
+    function salvarWebhook() { localStorage.setItem('cc_drive_webhook', document.getElementById('drive-webhook').value.trim()); carregarWebhook(); toast("URL da nuvem salva!"); sincronizarManual(false, false); }
     
     // Nuvem única (do administrador): cada usuário envia e baixa só a SUA aba (o script cria uma aba por usuário)
     function sincronizarManual(forcePush = false, clickUsuario = false) {
