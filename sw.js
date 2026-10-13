@@ -1,8 +1,8 @@
 /* ControlCard — Service Worker
    Troque o número de VERSAO sempre que alterar ESTE arquivo (sw.js) ou os ícones.
-   O index.html e o version.json NÃO ficam presos no cache: sempre conferem a rede primeiro,
+   O index.html, o version.json e o config.json NÃO ficam presos no cache: sempre conferem a rede primeiro,
    por isso a atualização do app chega sozinha (o próprio app avisa e recarrega). */
-const VERSAO = 'controlcard-v4.3';
+const VERSAO = 'controlcard-v4.5';
 const CACHE_APP = VERSAO + '-app';
 const CACHE_EXT = VERSAO + '-ext';
 
@@ -36,8 +36,8 @@ self.addEventListener('fetch', e => {
   if (SEM_CACHE.includes(url.hostname)) return;
 
   if (url.origin === self.location.origin) {
-    // version.json: sempre da rede (é ele que avisa que há versão nova)
-    if (url.pathname.endsWith('/version.json')) {
+    // version.json (avisa que há versão nova) e config.json (URL da nuvem): sempre da rede
+    if (url.pathname.endsWith('/version.json') || url.pathname.endsWith('/config.json')) {
       e.respondWith(fetch(req.url, { cache: 'no-store' }).catch(() => new Response('{}', { headers: { 'Content-Type': 'application/json' } })));
       return;
     }
