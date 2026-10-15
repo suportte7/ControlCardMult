@@ -230,6 +230,10 @@
         .aj-linha { padding: 6px 0; }
         .tree-header { padding: 4px 10px; }
         .dock { justify-content: space-around; }
+        .tree-card.quitado { opacity: 0.78; }
+        .ext-grupo { display: flex; align-items: center; gap: 8px; padding: 6px 4px 4px; margin-top: 8px; border-bottom: 1px solid var(--border); font-size: 0.8rem; font-weight: 800; }
+        .ext-grupo.quitado { opacity: 0.8; }
+        .ext-grupo .ext-grupo-nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     </style>
 </head>
 <body>
@@ -719,7 +723,7 @@
 </div>
 
 <script>
-    const APP_VERSION = '4.5'; // única fonte da versão; mude também o version.json (veja o LEIA-ME)
+    const APP_VERSION = '4.6'; // única fonte da versão; mude também o version.json (veja o LEIA-ME)
     // (Opcional) URL da nuvem direto no código. O normal é usar o config.json (veja o LEIA-ME): ele é enviado uma vez e as novas versões do app não o substituem.
     const URL_NUVEM_APP = '';
     const DB_NOME = 'ControlCard_Multi_DB'; 
@@ -903,6 +907,7 @@
             document.getElementById('login-main-title').innerText = "CRIAR ADMIN";
             document.getElementById('login-subtitle').innerText = "Defina seu acesso Mestre";
             document.getElementById('login-aviso-novo').style.display = 'block';
+            if (ROOT.dados.__novo) document.getElementById('login-aviso-novo').innerHTML = 'Os dados do seu backup já foram carregados. <strong>Crie o seu acesso</strong> (nome e PIN) para abri-los.';
             document.getElementById('btn-importar-login').style.display = 'block';
             return;
         }
@@ -996,7 +1001,7 @@
                     ROOT = { versao: 'v4', usuarios: Array.isArray(novo.usuarios) ? novo.usuarios : [], dados: {} };
                     Object.keys(novo.dados).forEach(k => { ROOT.dados[k] = normalizarDataset(novo.dados[k]); });
                 } else if (novo && Array.isArray(novo.despesas)) { // backup de um usuário (ou backup antigo)
-                    const usuariosBackup = Array.isArray(novo.usuarios) ? novo.usuarios.filter(u => u && u.id && u.nome) : [];
+                    const usuariosBackup = Array.isArray(novo.usuarios) ? novo.usuarios.filter(u => u && u.id && u.nome && u.pin) : []; // backups da nuvem/Drive não trazem PIN: nesse caso os dados esperam o acesso ser criado
                     const ds = normalizarDataset(novo);
                     if (currentUser) {
                         if (!confirm(`Substituir TODOS os seus dados atuais por este backup (${ds.despesas.length} despesas)?`)) { e.target.value = ''; return; }
@@ -1415,69 +1420,67 @@
 
     function alternarVisaoDash(modo) { visaoDashboardAtual = modo; document.getElementById('btn-visao-pessoa').classList.toggle('active', modo === 'pessoa'); document.getElementById('btn-visao-cartao').classList.toggle('active', modo === 'cartao'); atualizarSaldos(); }
 
+    /* ===== Ordenação das listas: quem ainda deve vem primeiro (maior dívida no topo); quem já pagou (verde) desce ===== */
+    // Ordem cronológica pela MESMA data que aparece na linha (como num extrato de cartão)
+    const dataExibida = x => String(x.dataCompra || x.data || ((x.dataRef || '0000-00') + '-01'));
+    const porDataVirtual = (a, b) => dataExibida(a).localeCompare(dataExibida(b)) || String(a.desc || '').localeCompare(String(b.desc || ''));
+    function resumoPessoa(p, despesas, pags) {
+        const dp = despesas.filter(d => d.pessoa === p), pp = pags.filter(pg => pg.pessoa === p);
+        const sumD = dp.reduce((s, d) => s + getValorAjustadoEmprestimo(d), 0), sumP = pp.reduce((s, pg) => s + pg.valor, 0);
+        return { p, dp, pp, sumD, sumP, saldo: sumD - sumP };
+    }
+    function ordenarPorDivida(resumos) {
+        return resumos.sort((a, b) => {
+            const qa = a.saldo <= 0.01, qb = b.saldo <= 0.01;
+            if (qa !== qb) return qa ? 1 : -1;
+            return qa ? a.p.localeCompare(b.p) : ((b.saldo - a.saldo) || a.p.localeCompare(b.p));
+        });
+    }
+    function textoSaldo(saldo) { return saldo > 0.01 ? brl(saldo) : (saldo < -0.01 ? 'crédito ' + brl(-saldo) : '✔ QUITADO'); }
+    const somaDesp = lista => lista.reduce((s, d) => s + getValorAjustadoEmprestimo(d), 0);
+    function linhaDespesaArvore(d) {
+        const i = formatarInfoItem(d, false), v = getValorAjustadoEmprestimo(d);
+        return `<div class="t-row" onclick="abrirEdicao(${d.id}, 'desp')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP} ${i.compIcon}</strong><span>📅 ${i.textData} | Ref: ${formatarMesAno(d.dataRef)} ${i.cat}</span></div><div class="t-val desp">${brl(v)}</div></div>`;
+    }
+
     function construirArvorePessoas(pessoasUnicas, despesas, pags) {
         let html = '';
-        pessoasUnicas.sort().forEach(p => {
-            let dp = despesas.filter(d => d.pessoa === p); let pp = pags.filter(pg => pg.pessoa === p);
-            let sumD = dp.reduce((s, d) => s + getValorAjustadoEmprestimo(d), 0);
-            let sumP = pp.reduce((s, pg) => s + pg.valor, 0);
-            let saldo = sumD - sumP;
-
-            if(Math.abs(saldo) > 0.01 || sumD > 0 || sumP > 0) {
-                let idP = 'p_' + Math.random().toString(36).substr(2, 9);
-                let subHtml = '';
-                
-                let gruposOrigem = [...new Set(dp.map(d => d.cartao || '💲 ACORDOS / DINHEIRO'))].filter(Boolean);
-                gruposOrigem.forEach(c => {
-                    let dc = dp.filter(d => (d.cartao || '💲 ACORDOS / DINHEIRO') === c);
-                    let sumC = dc.reduce((s, d) => s + getValorAjustadoEmprestimo(d), 0);
-                    let idC = idP + '_' + Math.random().toString(36).substr(2, 9);
-                    
-                    let itensHtml = dc.map(d => {
-                        let i = formatarInfoItem(d, false); let v = getValorAjustadoEmprestimo(d);
-                        return `<div class="t-row" onclick="abrirEdicao(${d.id}, 'desp')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP} ${i.compIcon}</strong><span>📅 ${i.textData} | Ref: ${formatarMesAno(d.dataRef)} ${i.cat}</span></div><div class="t-val desp">R$ ${v.toFixed(2)}</div></div>`;
-                    }).join('');
-                    subHtml += `<div class="sub-tree-card" id="${idC}"><div class="sub-tree-header" onclick="document.getElementById('${idC}').classList.toggle('open')"><span>${c.includes('💲') ? c : '💳 ' + c}</span><span style="color: var(--text);">R$ ${sumC.toFixed(2)}</span></div><div class="sub-tree-body">${itensHtml}</div></div>`;
-                });
-
-                if(sumP > 0) {
-                    let pagHtml = pp.map(pg => {
-                        let i = formatarInfoItem(pg, true);
-                        return `<div class="t-row" onclick="abrirEdicao(${pg.id}, 'pag')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP} ${i.compIcon}</strong><span>📅 Recebido: ${i.textData}</span></div><div class="t-val pag">- R$ ${pg.valor.toFixed(2)}</div></div>`;
-                    }).join('');
-                    subHtml += `<div class="sub-tree-card" id="${idP}_pags" style="border-color: var(--success);"><div class="sub-tree-header" style="color: var(--success);" onclick="document.getElementById('${idP}_pags').classList.toggle('open')"><span>💰 Pagamentos / Abatimentos</span><span>- R$ ${sumP.toFixed(2)}</span></div><div class="sub-tree-body">${pagHtml}</div></div>`;
-                }
-                
-                html += `<div class="tree-card" id="${idP}"><div class="tree-header" onclick="document.getElementById('${idP}').classList.toggle('open')"><div class="tree-person-info"><div class="avatar">${getIniciais(p)}</div><span>${p}</span></div><span style="color: ${saldo > 0 ? 'var(--danger)' : 'var(--success)'}">R$ ${Math.abs(saldo).toFixed(2)}</span></div><div class="tree-body">${subHtml}</div></div>`;
+        const resumos = ordenarPorDivida(pessoasUnicas.map(p => resumoPessoa(p, despesas, pags)).filter(r => Math.abs(r.saldo) > 0.01 || r.sumD > 0 || r.sumP > 0));
+        resumos.forEach(({ p, dp, pp, sumP, saldo }) => {
+            const quitado = saldo <= 0.01; const idP = 'p_' + Math.random().toString(36).substr(2, 9); let subHtml = '';
+            // origens (cartões e acordos), da maior para a menor; lançamentos de cada uma em ordem de data
+            const grupos = [...new Set(dp.map(d => d.cartao || '💲 ACORDOS / DINHEIRO'))].filter(Boolean).map(c => {
+                const dc = dp.filter(d => (d.cartao || '💲 ACORDOS / DINHEIRO') === c).sort(porDataVirtual); return { c, dc, sumC: somaDesp(dc) };
+            }).sort((x, y) => (y.sumC - x.sumC) || x.c.localeCompare(y.c));
+            grupos.forEach(({ c, dc, sumC }) => {
+                const idC = idP + '_' + Math.random().toString(36).substr(2, 9);
+                subHtml += `<div class="sub-tree-card" id="${idC}"><div class="sub-tree-header" onclick="document.getElementById('${idC}').classList.toggle('open')"><span>${c.includes('💲') ? c : '💳 ' + c}</span><span style="color: var(--text);">${brl(sumC)}</span></div><div class="sub-tree-body">${dc.map(linhaDespesaArvore).join('')}</div></div>`;
+            });
+            if (sumP > 0) {
+                const pagHtml = pp.slice().sort(porDataVirtual).map(pg => {
+                    const i = formatarInfoItem(pg, true);
+                    return `<div class="t-row" onclick="abrirEdicao(${pg.id}, 'pag')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP} ${i.compIcon}</strong><span>📅 Recebido: ${i.textData}</span></div><div class="t-val pag">- ${brl(pg.valor)}</div></div>`;
+                }).join('');
+                subHtml += `<div class="sub-tree-card" id="${idP}_pags" style="border-color: var(--success);"><div class="sub-tree-header" style="color: var(--success);" onclick="document.getElementById('${idP}_pags').classList.toggle('open')"><span>💰 Pagamentos / Abatimentos</span><span>- ${brl(sumP)}</span></div><div class="sub-tree-body">${pagHtml}</div></div>`;
             }
+            html += `<div class="tree-card${quitado ? ' quitado' : ''}" id="${idP}"><div class="tree-header" onclick="document.getElementById('${idP}').classList.toggle('open')"><div class="tree-person-info"><div class="avatar">${getIniciais(p)}</div><span>${p}</span></div><span style="color: ${quitado ? 'var(--success)' : 'var(--danger)'}">${textoSaldo(saldo)}</span></div><div class="tree-body">${subHtml}</div></div>`;
         });
         return html;
     }
 
     function construirArvoreCartoes(despesas) {
         let html = '';
-        let cartoes = [...new Set(despesas.map(d => d.cartao))].filter(Boolean);
-        cartoes.sort().forEach(c => {
-            let dc = despesas.filter(d => d.cartao === c);
-            let sumC = dc.reduce((s, d) => s + getValorAjustadoEmprestimo(d), 0);
-            if(sumC > 0) {
-                let idC = 'c_' + Math.random().toString(36).substr(2, 9);
-                let pessoasNoCartao = [...new Set(dc.map(d => d.pessoa))];
-                let subHtml = '';
-                
-                pessoasNoCartao.forEach(p => {
-                    let dp = dc.filter(d => d.pessoa === p);
-                    let sumP = dp.reduce((s, d) => s + getValorAjustadoEmprestimo(d), 0);
-                    let idP = idC + '_' + Math.random().toString(36).substr(2, 9);
-                    
-                    let itensHtml = dp.map(d => {
-                        let i = formatarInfoItem(d, false); let v = getValorAjustadoEmprestimo(d);
-                        return `<div class="t-row" onclick="abrirEdicao(${d.id}, 'desp')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP} ${i.compIcon}</strong><span>📅 ${i.textData} | Ref: ${formatarMesAno(d.dataRef)}</span></div><div class="t-val desp">R$ ${v.toFixed(2)}</div></div>`;
-                    }).join('');
-                    subHtml += `<div class="sub-tree-card" id="${idP}"><div class="sub-tree-header" onclick="document.getElementById('${idP}').classList.toggle('open')"><div class="tree-person-info"><div class="avatar">${getIniciais(p)}</div><span>${p}</span></div><span style="color: var(--text);">R$ ${sumP.toFixed(2)}</span></div><div class="sub-tree-body">${itensHtml}</div></div>`;
-                });
-                html += `<div class="tree-card" id="${idC}"><div class="tree-header" onclick="document.getElementById('${idC}').classList.toggle('open')"><span>💳 ${c}</span><span style="color: var(--danger)">R$ ${sumC.toFixed(2)}</span></div><div class="tree-body">${subHtml}</div></div>`;
-            }
+        const cartoes = [...new Set(despesas.map(d => d.cartao))].filter(Boolean).map(c => { const dc = despesas.filter(d => d.cartao === c); return { c, dc, sumC: somaDesp(dc) }; })
+            .filter(x => x.sumC > 0).sort((x, y) => (y.sumC - x.sumC) || x.c.localeCompare(y.c));
+        cartoes.forEach(({ c, dc, sumC }) => {
+            const idC = 'c_' + Math.random().toString(36).substr(2, 9); let subHtml = '';
+            const pessoas = [...new Set(dc.map(d => d.pessoa))].map(p => { const dp = dc.filter(d => d.pessoa === p).sort(porDataVirtual); return { p, dp, sumP: somaDesp(dp) }; })
+                .sort((x, y) => (y.sumP - x.sumP) || x.p.localeCompare(y.p));
+            pessoas.forEach(({ p, dp, sumP }) => {
+                const idP = idC + '_' + Math.random().toString(36).substr(2, 9);
+                subHtml += `<div class="sub-tree-card" id="${idP}"><div class="sub-tree-header" onclick="document.getElementById('${idP}').classList.toggle('open')"><div class="tree-person-info"><div class="avatar">${getIniciais(p)}</div><span>${p}</span></div><span style="color: var(--text);">${brl(sumP)}</span></div><div class="sub-tree-body">${dp.map(linhaDespesaArvore).join('')}</div></div>`;
+            });
+            html += `<div class="tree-card" id="${idC}"><div class="tree-header" onclick="document.getElementById('${idC}').classList.toggle('open')"><span>💳 ${c}</span><span style="color: var(--danger)">${brl(sumC)}</span></div><div class="tree-body">${subHtml}</div></div>`;
         });
         return html;
     }
@@ -1516,11 +1519,11 @@
         document.getElementById('cal-metric-saldo').innerText = brl(Math.abs(totD - totP));
 
         // Lista do mês, agrupada por dia (aparece sempre; tocar no dia do calendário abre só aquele dia)
-        itens.sort((a, b) => a.dia - b.dia); let htmlL = ''; let diaAtualL = null;
+        itens.sort((a, b) => a.dia - b.dia || (a.d || a.p).pessoa.localeCompare((b.d || b.p).pessoa) || String((a.d || a.p).desc || '').localeCompare(String((b.d || b.p).desc || ''))); let htmlL = ''; let diaAtualL = null;
         itens.forEach(it => {
             if (it.dia !== diaAtualL) { diaAtualL = it.dia; htmlL += `<div class="cal-lista-dia">Dia ${it.dia}</div>`; }
-            if (it.d) { const i = formatarInfoItem(it.d, false); htmlL += `<div class="t-row" onclick="abrirEdicao(${it.d.id}, 'desp')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${it.d.pessoa} | 💳 ${it.d.cartao||'💲'}</span></div><div class="t-val desp">R$ ${it.v.toFixed(2)}</div></div>`; }
-            else { const i = formatarInfoItem(it.p, true); htmlL += `<div class="t-row" onclick="abrirEdicao(${it.p.id}, 'pag')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${it.p.pessoa} | 💰 Recebido</span></div><div class="t-val pag">+ R$ ${it.p.valor.toFixed(2)}</div></div>`; }
+            if (it.d) { const i = formatarInfoItem(it.d, false); htmlL += `<div class="t-row" onclick="abrirEdicao(${it.d.id}, 'desp')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${it.d.pessoa} | 💳 ${it.d.cartao||'💲'}</span></div><div class="t-val desp">${brl(it.v)}</div></div>`; }
+            else { const i = formatarInfoItem(it.p, true); htmlL += `<div class="t-row" onclick="abrirEdicao(${it.p.id}, 'pag')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${it.p.pessoa} | 💰 Recebido</span></div><div class="t-val pag">+ ${brl(it.p.valor)}</div></div>`; }
         });
         document.getElementById('cal-mes-titulo').innerText = `LANÇAMENTOS DE ${formatarMesAno(mesStr)} (${itens.length})`;
         document.getElementById('cal-mes-lista').innerHTML = htmlL || '<p style="color:var(--text-light); text-align:center; font-size:0.8rem;">Sem lançamentos neste mês.</p>';
@@ -1546,27 +1549,28 @@
         let mesStr = document.getElementById('cal-seletor-mes').value;
         const fP = document.getElementById('cal-filtro-pessoa').value;
         
+        const [anoDet, mesDet] = mesStr.split('-').map(Number); const maxDiaDet = new Date(anoDet, mesDet, 0).getDate();
         let despDia = obterDespesasPermitidas().filter(d => {
             if(d.dataRef !== mesStr || (fP !== 'TODOS' && d.pessoa !== fP) || (cartoesSelCal.length > 0 && !cartoesSelCal.includes(d.cartao))) return false;
             let dDia = d.dataCompra && d.dataCompra.includes('-') ? parseInt(d.dataCompra.split('-')[2]) : 10;
             if(!d.dataCompra && d.cartao) { let ci = db.cartoes.find(c => (c.nome||c) === d.cartao); dDia = ci && ci.vencimento ? ci.vencimento : 10; }
-            return dDia === dia;
-        });
+            return Math.min(dDia, maxDiaDet) === dia;
+        }).sort((x, y) => x.pessoa.localeCompare(y.pessoa) || String(x.desc || '').localeCompare(String(y.desc || '')));
 
         let pagDia = obterPagamentosPermitidos().filter(p => {
             if((p.dataRef || p.data.substring(0,7)) !== mesStr || (fP !== 'TODOS' && p.pessoa !== fP)) return false;
             let pDia = p.data && p.data.includes('-') ? parseInt(p.data.split('-')[2]) : 1;
-            return pDia === dia;
-        });
+            return Math.min(pDia, maxDiaDet) === dia;
+        }).sort((x, y) => x.pessoa.localeCompare(y.pessoa) || String(x.desc || '').localeCompare(String(y.desc || '')));
         
         let html = '';
         despDia.forEach(d => {
             let i = formatarInfoItem(d, false); let v = getValorAjustadoEmprestimo(d);
-            html += `<div class="t-row" onclick="abrirEdicao(${d.id}, 'desp')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${d.pessoa} | 💳 ${d.cartao||'💲'}</span></div><div class="t-val desp">R$ ${v.toFixed(2)}</div></div>`;
+            html += `<div class="t-row" onclick="abrirEdicao(${d.id}, 'desp')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${d.pessoa} | 💳 ${d.cartao||'💲'}</span></div><div class="t-val desp">${brl(v)}</div></div>`;
         });
         pagDia.forEach(pg => {
             let i = formatarInfoItem(pg, true);
-            html += `<div class="t-row" onclick="abrirEdicao(${pg.id}, 'pag')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${pg.pessoa} | 💰 Recebido</span></div><div class="t-val pag">+ R$ ${pg.valor.toFixed(2)}</div></div>`;
+            html += `<div class="t-row" onclick="abrirEdicao(${pg.id}, 'pag')"><div class="t-desc"><strong>${i.descLimp} ${i.badgeP}</strong><span>👤 ${pg.pessoa} | 💰 Recebido</span></div><div class="t-val pag">+ ${brl(pg.valor)}</div></div>`;
         });
         
         document.getElementById('cal-dia-titulo').innerText = `DIA ${dia}`;
@@ -1591,7 +1595,7 @@
         const fP = document.getElementById('extrato-pessoa').value;
         let range = getFiltroRange('extrato-filtro-global', 'extrato-dt-ini', 'extrato-dt-fim');
         const busca = ((document.getElementById('extrato-busca')||{}).value || '').trim().toLowerCase();
-        
+
         let filtradas = [];
         obterDespesasPermitidas().forEach(d => {
             if (!casaBusca(d, busca)) return;
@@ -1605,21 +1609,33 @@
             if (cartoesSelExt.length > 0) return;
             if (dentroDoPeriodo(pg, range)) filtradas.push({...pg, _uid: 'pag_'+pg.id, _tipo: 'pag'});
         });
-        filtradas.sort((a,b) => calcularDataVirtual(a).localeCompare(calcularDataVirtual(b)));
+        filtradas.sort(porDataVirtual);
 
-        let html = filtradas.map(d => {
+        // Uma seção por pessoa, com o saldo dela: quem ainda deve vem primeiro (maior dívida no topo); quem já pagou (verde) desce
+        const porPessoa = {}; filtradas.forEach(x => (porPessoa[x.pessoa] = porPessoa[x.pessoa] || []).push(x));
+        const grupos = ordenarPorDivida(Object.keys(porPessoa).map(p => ({ p, itens: porPessoa[p], saldo: porPessoa[p].reduce((t, x) => t + (x._tipo === 'desp' ? getValorAjustadoEmprestimo(x) : -x.valor), 0) })));
+        const linha = d => {
             let isD = d._tipo === 'desp'; let i = formatarInfoItem(d, !isD);
             let val = isD ? getValorAjustadoEmprestimo(d) : d.valor;
             let selClass = extSelecionados.has(d._uid) ? 'selected' : '';
             let chkStyle = extSelecionados.has(d._uid) ? 'background: var(--primary); border-color: var(--primary); color: var(--bg);' : 'color: transparent; border-color: var(--text-light); background: transparent;';
-
-            return `<div class="check-item ${selClass}" id="ext-item-${d._uid}" onclick="toggleExtratoSel('${d._uid}')">
+            return `<div class="check-item ${selClass}" id="ext-item-${d._uid}" data-pessoa="${escHtml(d.pessoa)}" onclick="toggleExtratoSel('${d._uid}')">
                 <span class="material-icons-outlined check-mark" style="${chkStyle} border-width:2px; border-style:solid; border-radius: 5px; display:flex; align-items:center; justify-content:center; width:18px; height:18px; flex:none; transition:0.2s;">check</span>
-                <div class="t-desc"><strong>${i.descLimp} ${i.badgeP} ${i.compIcon}</strong><span>👤 ${d.pessoa} | ${isD ? `💳 ${d.cartao||'💲'}` : '💰 Recebido'} • Ref: ${formatarMesAno(d.dataRef || d.data.substring(0,7))}</span></div>
-                <div class="t-val" style="color:${isD ? 'var(--danger)' : 'var(--success)'};">${isD ? '' : '+ '}R$ ${val.toFixed(2)}</div>
+                <div class="t-desc"><strong>${i.descLimp} ${i.badgeP} ${i.compIcon}</strong><span>${isD ? `💳 ${d.cartao||'💲'}` : '💰 Recebido'} • ${i.textData} • Ref: ${formatarMesAno(d.dataRef || d.data.substring(0,7))}</span></div>
+                <div class="t-val" style="color:${isD ? 'var(--danger)' : 'var(--success)'};">${isD ? '' : '+ '}${brl(val)}</div>
             </div>`;
+        };
+        let html = grupos.map(g => {
+            const quitado = g.saldo <= 0.01;
+            return `<div class="ext-grupo${quitado ? ' quitado' : ''}"><div class="avatar">${getIniciais(g.p)}</div><span class="ext-grupo-nome">${escHtml(g.p)}</span><span style="color:${quitado ? 'var(--success)' : 'var(--danger)'};">${textoSaldo(g.saldo)}</span><button class="btn-small" style="padding:3px 8px; font-size:0.65rem;" onclick="selecionarPessoaExtrato(decodeURIComponent('${encodeURIComponent(g.p)}'))" title="Selecionar todos os lançamentos desta pessoa">✔ TODOS</button></div>` + g.itens.map(linha).join('');
         }).join('');
         document.getElementById('lista-transacoes-container').innerHTML = html || '<p style="color:var(--text-light); text-align:center; padding-top:20px;">Nenhum registro no período.</p>';
+    }
+    // Marca (ou desmarca, se já estiverem todos marcados) os lançamentos de uma pessoa
+    function selecionarPessoaExtrato(nome) {
+        const divs = [...document.querySelectorAll('#lista-transacoes-container .check-item')].filter(div => div.dataset.pessoa === nome);
+        const todos = divs.length > 0 && divs.every(div => div.classList.contains('selected'));
+        divs.forEach(div => { const uid = div.id.replace('ext-item-', ''); if (todos === extSelecionados.has(uid)) toggleExtratoSel(uid); });
     }
 
     function toggleExtratoSel(uid) {
@@ -1635,21 +1651,23 @@
         db.despesas.forEach(d => { if(extSelecionados.has('desp_'+d.id)) t += getValorAjustadoEmprestimo(d); });
         db.pagamentos.forEach(pg => { if(extSelecionados.has('pag_'+pg.id)) t -= pg.valor; });
         document.getElementById('contagem-selecionados').innerText = `${extSelecionados.size} ITENS`; 
-        document.getElementById('total-selecionados').innerText = `R$ ${Math.abs(t).toFixed(2)}`; 
+        document.getElementById('total-selecionados').innerText = `${brl(Math.abs(t))}`; 
         document.getElementById('total-selecionados').style.color = t < 0 ? 'var(--success)' : 'var(--text)';
     }
 
     function enviarZapSelecionados() {
         if(extSelecionados.size === 0) return alert("Selecione os lançamentos primeiro.");
-        let sD = db.despesas.filter(d => extSelecionados.has('desp_'+d.id)); 
-        let sP = db.pagamentos.filter(pg => extSelecionados.has('pag_'+pg.id));
-        let p = sD.length > 0 ? sD[0].pessoa : (sP.length > 0 ? sP[0].pessoa : 'Cliente');
+        let sD = db.despesas.filter(d => extSelecionados.has('desp_'+d.id)).sort(porDataVirtual);
+        let sP = db.pagamentos.filter(pg => extSelecionados.has('pag_'+pg.id)).sort(porDataVirtual);
+        const pessoas = [...new Set(sD.map(d => d.pessoa).concat(sP.map(pg => pg.pessoa)))];
+        if (pessoas.length > 1) return alert('Você marcou lançamentos de ' + pessoas.length + ' pessoas (' + pessoas.join(', ') + ').\n\nMarque os lançamentos de UMA pessoa por vez para enviar a cobrança.');
+        let p = pessoas[0] || 'Cliente';
         let t = sD.reduce((a,b)=>a+getValorAjustadoEmprestimo(b),0) - sP.reduce((a,b)=>a+b.valor,0);
 
         let txt = `📄 *Resumo de Fatura*\n👤 *${p}*\n\n`;
-        if(sD.length > 0){ txt += `🛒 *Cobranças:*\n`; sD.forEach((d,i) => txt += `${i+1}. ${d.desc} - R$ ${getValorAjustadoEmprestimo(d).toFixed(2)}\n`); }
-        if(sP.length > 0){ txt += `\n💰 *Abatimentos / Recebidos:*\n`; sP.forEach((pg,i) => txt += `${i+1}. ${pg.desc||'Recebimento'} - R$ ${pg.valor.toFixed(2)}\n`); }
-        txt += `\n💳 *TOTAL A PAGAR: R$ ${t.toFixed(2)}*`;
+        if(sD.length > 0){ txt += `🛒 *Cobranças:*\n`; sD.forEach((d,i) => txt += `${i+1}. ${d.desc} - ${brl(getValorAjustadoEmprestimo(d))}\n`); }
+        if(sP.length > 0){ txt += `\n💰 *Abatimentos / Recebidos:*\n`; sP.forEach((pg,i) => txt += `${i+1}. ${pg.desc||'Recebimento'} - ${brl(pg.valor)}\n`); }
+        txt += t > 0.01 ? `\n💳 *TOTAL A PAGAR: ${brl(t)}*` : (t < -0.01 ? `\n✅ *Crédito de ${brl(-t)}*` : `\n✅ *Quitado*`);
         window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(txt)}`, '_blank');
     }
 
@@ -2287,7 +2305,7 @@
             let targetD = g.find(d => (d.dataRef || d.data.substring(0,7)) >= mesAtualStr) || g[g.length-1];
             let mainClick = `abrirEdicao(${targetD.id}, '${g[0]._tipo}')`;
             html += `<div class="check-item" style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="flex:1;" onclick="${mainClick}"><strong style="font-size:0.95rem; color:${g[0]._tipo === 'pag' ? 'var(--success)' : 'var(--text)'};">${g[0].isAssinatura ? g[0].desc : (g[0].desc||'').replace(/\(\d+\/\d+\)/, '').trim()}</strong><br><span style="font-size:0.75rem; color:var(--text-light)">R$ ${g[0].valor.toFixed(2)} /mês</span></div>
+                <div style="flex:1;" onclick="${mainClick}"><strong style="font-size:0.95rem; color:${g[0]._tipo === 'pag' ? 'var(--success)' : 'var(--text)'};">${g[0].isAssinatura ? g[0].desc : (g[0].desc||'').replace(/\(\d+\/\d+\)/, '').trim()}</strong><br><span style="font-size:0.75rem; color:var(--text-light)">${brl(g[0].valor)} /mês</span></div>
                 <div style="background:var(--primary); color:#000; padding:4px 8px; border-radius:6px; font-weight:bold; cursor:pointer;" onclick="${mainClick}">${g[0].isAssinatura?'🔁':g.length+'x'}</div>
             </div>`;
         }
@@ -2298,7 +2316,7 @@
     function renderizarListaTransferencia() {
         transSelecionados.clear(); const de = document.getElementById('transf-de').value;
         let html = ''; db.despesas.filter(d => d.pessoa === de).forEach(d => {
-            html += `<div class="check-item" id="tr-item-${d.id}" onclick="toggleTransfSel(${d.id})"><span class="material-icons-outlined check-mark" style="color: transparent; border: 2px solid var(--text-light); border-radius: 6px; width: 18px; height: 18px; display:flex; align-items:center; justify-content:center;">check</span><div class="t-desc"><strong style="font-size:0.85rem;">${d.desc}</strong><span>${d.cartao || '💲 Acordo'} • Ref: ${formatarMesAno(d.dataRef)}</span></div><div class="t-val">R$ ${d.valor.toFixed(2)}</div></div>`;
+            html += `<div class="check-item" id="tr-item-${d.id}" onclick="toggleTransfSel(${d.id})"><span class="material-icons-outlined check-mark" style="color: transparent; border: 2px solid var(--text-light); border-radius: 6px; width: 18px; height: 18px; display:flex; align-items:center; justify-content:center;">check</span><div class="t-desc"><strong style="font-size:0.85rem;">${d.desc}</strong><span>${d.cartao || '💲 Acordo'} • Ref: ${formatarMesAno(d.dataRef)}</span></div><div class="t-val">${brl(d.valor)}</div></div>`;
         });
         document.getElementById('lista-transferencia-container').innerHTML = html || '<p style="color:var(--text-light); font-size:0.8rem;">Nenhuma dívida para transferir.</p>';
     }
