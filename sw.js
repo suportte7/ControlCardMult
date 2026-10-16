@@ -2,7 +2,7 @@
    Troque o número de VERSAO sempre que alterar ESTE arquivo (sw.js) ou os ícones.
    O index.html, o version.json e o config.json NÃO ficam presos no cache: sempre conferem a rede primeiro,
    por isso a atualização do app chega sozinha (o próprio app avisa e recarrega). */
-const VERSAO = 'controlcard-v4.5';
+const VERSAO = 'controlcard-v4.6';
 const CACHE_APP = VERSAO + '-app';
 const CACHE_EXT = VERSAO + '-ext';
 
