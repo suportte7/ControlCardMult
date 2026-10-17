@@ -1,8 +1,0 @@
-{
-  "versao": "4.6",
-  "data": "2026-10-15",
-  "notas": [
-    "A URL da nuvem agora fica no arquivo config.json (enviado uma vez ao servidor): novas versões do app não precisam mais dela.",
-    "Em Ajuste > Administração > Nuvem do app, o botão BAIXAR config.json gera o arquivo pronto e mostra se o servidor já o tem."
-  ]
-}
