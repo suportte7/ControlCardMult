@@ -1,0 +1,10 @@
+{
+  "versao": "4.7",
+  "data": "2026-10-15",
+  "notas": [
+    "Cadastro central de usuários na nuvem: cada pessoa entra em QUALQUER celular com o nome e o PIN que o administrador criou.",
+    "Usuário comum nunca vira administrador e não vê nada de Administração no Ajuste; celular novo mostra a tela normal de entrada.",
+    "A aba de cada usuário na nuvem só abre com o nome e o PIN dele; 5 PINs errados bloqueiam por 15 minutos.",
+    "Administração > Cadastro central: registrar, criar usuários, redefinir PIN e desativar. Trocar PIN e \"Esqueci meu PIN\" valem em todos os aparelhos."
+  ]
+}
